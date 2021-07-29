@@ -6,3 +6,4 @@ class LCSSClient:
         response = requests.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, 
                      data = {'username': username, 'password': password})
         self._token = response.json()["token"]
+        
