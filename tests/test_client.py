@@ -1,5 +1,5 @@
 from .context import lcsscaseapi
-from lcsscaseapi.lcssclient import LCSSClient
+from lcsscaseapi.client import LCSSClient
 from lcsscaseapi import constants
 import pytest
 
