@@ -23,10 +23,21 @@ class CaseMeta:
             return not str(self) == str(other)
     
     def __str__(self):
+        # be careful with this - if some key's values should be hidden in a future change make sure to change this method
         return json.dumps(self.__dict__, sort_keys=True)
+    
+    def __repr__(self):
+        return "CaseMeta Object: " + str(self)
 
     @classmethod
     def from_dict(self, **fields):
         cm = self()
-        cm.__dict__.update(fields)
+        cm.case_id = fields["case_id"]
+        cm.case_name = fields["case_name"]
+        cm.title = fields["title"]
+        cm.doc_title = fields["doc_title"]
+        cm.doc_id = fields["doc_id"]
+        cm.doc_type = fields["doc_type"]
+        cm.docket_number = fields["docket_number"]
+        cm.outcome = fields["outcome"]
         return cm
