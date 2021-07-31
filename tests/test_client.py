@@ -74,3 +74,53 @@ def test_search_cases(requests_mock):
     cases = client.search_cases(title="9th Cir.")
 
     assert cases == returncasemeta
+    assert requests_mock.request_history[-1].qs == {"title":["9th cir."]} # notice: search terms are case insensitive
+
+def test_search_cases_multiple_args(requests_mock):
+    # test that multiple search arguments load correctly
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    returnjson = [
+        {
+            "case_id": "X44DT7",
+            "case_name": "Courtney v. Custer County Bank",
+            "title": "Courtney v. Custer County Bank, 198 F.2d 828 (9th Cir. 1952), Court Opinion",
+            "doc_title": "Courtney v. Custer County Bank, 198 F.2d 828 (9th Cir. 1952), Court Opinion",
+            "doc_id": "X44DT7",
+            "doc_type": "OPINIONS",
+            "docket_number": "13085",
+            "outcome": "Judgment Affirmed"
+        },
+        {
+            "case_id": "X44CJ7",
+            "case_name": "Jefferson v. Stockholders Publishing Co.",
+            "title": "Jefferson v. Stockholders Publishing Co., 194 F.2d 281 (9th Cir. 1952), Court Opinion",
+            "doc_title": "Jefferson v. Stockholders Publishing Co., 194 F.2d 281 (9th Cir. 1952), Court Opinion",
+            "doc_id": "X44CJ7",
+            "doc_type": "OPINIONS",
+            "docket_number": "12879",
+            "outcome": "Judgment Reversed"
+        }
+    ]
+    returncasemeta = [CaseMeta.from_dict(**x) for x in returnjson]
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, json = returnjson, status_code=200)
+    cases = client.search_cases(title="9th Cir.", doc_id="X44")
+
+    assert cases == returncasemeta
+    assert requests_mock.request_history[-1].qs == {"title":["9th cir."], "doc_id":["x44"]} # notice: search terms are case insensitive
+
+def test_search_cases_no_result(requests_mock):
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, json = [], status_code=200)
+    cases = client.search_cases(title="9th Cir.", some_made_up_field="123") # searching by a field that doesn't exist should not trigger an error
+
+    assert len(cases) == 0
+    assert requests_mock.request_history[-1].qs == {"title":["9th cir."], "some_made_up_field":["123"]} # notice: search terms are case insensitive
+
+def test_search_cases_error(requests_mock):
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, status_code=500)
+    with pytest.raises(Exception, match="Unknown error.*"):
+        client.search_cases(title="9th Cir.", some_made_up_field="123")
