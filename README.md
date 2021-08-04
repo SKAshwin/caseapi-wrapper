@@ -1,4 +1,4 @@
-A wrapper around the [case-repository API]((https://github.com/SKAshwin/case-repository)) currently hosted at lcsscaseapi.duckdns.org (if this changes you need to chang the domain name in `lcsscaseapi/constants.py`).
+A wrapper around the [case-repository API](https://github.com/SKAshwin/case-repository) currently hosted at lcsscaseapi.duckdns.org (if this changes you need to chang the domain name in `lcsscaseapi/constants.py`).
 
 Any use of the wrapper begins by initializing an LCSSClient object (defined in `lcsscaseapi/client.py`). This requires supplying a valid username and password. After this, requests can be made using methods of the object, and will return objects of types specified in `lcsscaseapi/types.py`. 
 
