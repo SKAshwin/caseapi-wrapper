@@ -70,7 +70,7 @@ def test_search_cases(requests_mock):
         }
     ]
     returncasemeta = [CaseMeta.from_dict(**x) for x in returnjson]
-    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, json = returnjson, status_code=200)
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, json = returnjson, status_code=200)
     cases = client.search_cases(title="9th Cir.")
 
     assert cases == returncasemeta
@@ -103,7 +103,7 @@ def test_search_cases_multiple_args(requests_mock):
         }
     ]
     returncasemeta = [CaseMeta.from_dict(**x) for x in returnjson]
-    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, json = returnjson, status_code=200)
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, json = returnjson, status_code=200)
     cases = client.search_cases(title="9th Cir.", doc_id="X44")
 
     assert cases == returncasemeta
@@ -112,7 +112,7 @@ def test_search_cases_multiple_args(requests_mock):
 def test_search_cases_no_result(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
     client = LCSSClient(username="testing", password="123")
-    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, json = [], status_code=200)
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, json = [], status_code=200)
     cases = client.search_cases(title="9th Cir.", some_made_up_field="123") # searching by a field that doesn't exist should not trigger an error
 
     assert len(cases) == 0
@@ -121,6 +121,6 @@ def test_search_cases_no_result(requests_mock):
 def test_search_cases_error(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
     client = LCSSClient(username="testing", password="123")
-    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, status_code=500)
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, status_code=500)
     with pytest.raises(Exception, match="Unknown error.*"):
         client.search_cases(title="9th Cir.", some_made_up_field="123")

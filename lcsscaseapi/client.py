@@ -1,6 +1,7 @@
 from lcsscaseapi import constants
 from lcsscaseapi.types import CaseMeta
 import requests
+import json
 
 class LCSSClient:
     def __init__(self, username, password):
@@ -19,7 +20,7 @@ class LCSSClient:
             raise Exception("Unknown error, see response from server: " + str(response.content))
         
     def search_cases(self, **kwargs):
-        response = requests.get('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, params=kwargs, 
+        response = requests.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, params=kwargs, 
                             headers={"Authorization":"Token " + self._token})
         if response.status_code == 200:
             cases_dict = response.json() # the json array of case objects will be converted to an array of dictionaries
@@ -27,4 +28,3 @@ class LCSSClient:
             return cases
         else:
             raise Exception("Unknown error, see response from server: " + str(response.content))
-        
