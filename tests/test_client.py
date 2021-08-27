@@ -138,7 +138,7 @@ def test_upload_us_cases(requests_mock):
             "tags": ["HELLO", "WORLD"]
         }
     ]
-    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, json = new_cases_json)
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, json = new_cases_json, status_code = 201)
     cases = client.upload_us_cases(new_cases)
 
     assert cases == new_cases
