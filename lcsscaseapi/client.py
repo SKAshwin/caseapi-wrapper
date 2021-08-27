@@ -36,7 +36,6 @@ class LCSSClient:
                         json = json_data)
         if response.status_code == 201:
             cases_dict = response.json() # the json array of case objects will be converted to an array of dictionaries
-            print(cases_dict)
             cases_response = [CaseMeta.from_dict(**case_json) for case_json in cases_dict] # json response reutrns the cases just created
             return cases_response
         elif response.status_code == 403:
