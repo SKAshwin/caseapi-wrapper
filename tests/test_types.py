@@ -57,6 +57,27 @@ def test_eq_order():
 
     assert obj1 == obj2
 
+def test_eq_tag_order():
+    # checking that equality is not sensitive to the ordering of the tags in the array
+
+    obj1 = CaseMeta(
+        case_id = "X44DV3",
+        tags = ["HELLO", "WORLD"]
+    )
+
+    obj2 = CaseMeta(
+        case_id = "blah",
+        tags = ["WORLD", "HELLO"]
+    )
+
+    obj2.case_id = "X44DV3"
+
+    assert obj1 == obj2
+    
+    obj2.tags = ["WORLD", "HELLO"]
+
+    assert obj1 == obj2
+
 def test_neq():
     obj1 = CaseMeta(
         case_id = "X44DV3",
@@ -135,3 +156,26 @@ def test_from_dict_irrelevant_fields():
     )
     assert cm == expected
     assert not hasattr(cm, 'something_else')
+
+def test_from_dict_missing_fiels():
+    # tests that leaving some fields out doesn't trigger an error
+
+    case_info = {
+        "doc_type": "OPINIONS",
+        "docket_number": "13181",
+        "outcome": "Judgment Affirmed",
+        "case_id": "X44DV3",
+        "case_name": "Barker v. United States",
+        "doc_title": "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        "something_else": "shouldn't be here"
+    }
+    cm = CaseMeta.from_dict(**case_info)
+    expected = CaseMeta(
+        case_id = "X44DV3",
+        case_name = "Barker v. United States",
+        doc_title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        doc_type = "OPINIONS",
+        docket_number = "13181",
+        outcome = "Judgment Affirmed"
+    )
+    assert cm == expected
