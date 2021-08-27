@@ -124,3 +124,53 @@ def test_search_cases_error(requests_mock):
     requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, status_code=500)
     with pytest.raises(Exception, match="Unknown error.*"):
         client.search_cases(title="9th Cir.", some_made_up_field="123")
+
+def test_upload_us_cases(requests_mock):
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    new_cases = [CaseMeta(case_id="X1111"), CaseMeta(case_id="X2222", tags = ["HELLO", "WORLD"])]
+    new_cases_json = [
+        {
+            "case_id":"X1111"
+        },
+        {
+            "case_id":"X2222",
+            "tags": ["HELLO", "WORLD"]
+        }
+    ]
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, json = new_cases_json)
+    cases = client.upload_us_cases(new_cases)
+
+    assert cases == new_cases
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert [CaseMeta.from_dict(**case_json) for case_json in requests_mock.request_history[-1].json()] == new_cases
+    assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
+
+def test_upload_us_cases_non_admin(requests_mock):
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    new_cases = [CaseMeta(case_id="X1111"), CaseMeta(case_id="X2222", tags = ["HELLO", "WORLD"])]
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, status_code = 403)
+    with pytest.raises(Exception, match="Need admin credentials to upload new cases:*"):
+        client.upload_us_cases(new_cases)
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+
+def test_upload_us_cases_bad_case(requests_mock):
+    # server might return 400 if the case has tags that don't exist or a duplicate case ID etc
+    # this should be handled gracefully
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    new_cases = [CaseMeta(case_id="X1111"), CaseMeta(case_id="X2222", tags = ["HELLO", "WORLD"])]
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, status_code = 400)
+    with pytest.raises(Exception, match="Invalid case object, see:*"):
+        client.upload_us_cases(new_cases)
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+
+def test_upload_us_cases_unknown_error(requests_mock):
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    new_cases = [CaseMeta(case_id="X1111"), CaseMeta(case_id="X2222", tags = ["HELLO", "WORLD"])]
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, status_code = 500)
+    with pytest.raises(Exception, match="Unknown error, see response from server:*"):
+        client.upload_us_cases(new_cases)
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
