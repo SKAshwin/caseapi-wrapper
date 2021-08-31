@@ -92,12 +92,17 @@ class USCircuitCaseMeta(CaseMeta):
             return None
         return USCircuitCaseMeta.CIRCUITS.index(self.circuit_name)
 
-    # overriding this suffices to change behavior of eq and neq as well
-    def __str__(self):
-        data_dict = self.__dict__
+    # converts this object to a dictionary, correcting the _circuit_name
+    def to_dict(self):
+        data_dict = dict(self.__dict__) # make a copy, so as to not edit the original copy
+        # print(data_dict)
         data_dict["circuit_name"] = data_dict["_circuit_name"]
         del data_dict["_circuit_name"]
-        return json.dumps(data_dict, sort_keys=True)
+        return data_dict
+
+    # overriding this suffices to change behavior of eq and neq as well
+    def __str__(self):
+        return json.dumps(self.to_dict(), sort_keys=True)
         
     @classmethod
     def from_dict(self, **fields):
@@ -105,4 +110,6 @@ class USCircuitCaseMeta(CaseMeta):
         us_case = USCircuitCaseMeta()
         us_case.__dict__ = case_meta.__dict__ # copy over all attributes from the casemeta object
         us_case.circuit_name = fields.get("circuit_name", "")
+
+        return us_case
         

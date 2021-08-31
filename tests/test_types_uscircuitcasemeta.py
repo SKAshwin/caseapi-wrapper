@@ -146,3 +146,8 @@ def test_circuit_num():
     obj1.circuit_name = ""
     assert obj1.circuit_num() == None
 
+def test_from_dict():
+    pass
+
+def test_to_dict():
+    pass

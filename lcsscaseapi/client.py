@@ -1,5 +1,5 @@
 from lcsscaseapi import constants
-from lcsscaseapi.types import CaseMeta
+from lcsscaseapi.types import CaseMeta, USCircuitCaseMeta
 import requests
 import json
 
@@ -30,13 +30,13 @@ class LCSSClient:
             raise Exception("Unknown error, see response from server: " + str(response.content))
 
     def upload_us_cases(self, cases):
-        json_data = [case.__dict__ for case in cases]
+        json_data = [case.to_dict() for case in cases]
         response = requests.post('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, 
                         headers={"Authorization":"Token " + self._token},
                         json = json_data)
         if response.status_code == 201:
             cases_dict = response.json() # the json array of case objects will be converted to an array of dictionaries
-            cases_response = [CaseMeta.from_dict(**case_json) for case_json in cases_dict] # json response reutrns the cases just created
+            cases_response = [USCircuitCaseMeta.from_dict(**case_json) for case_json in cases_dict] # json response reutrns the cases just created
             return cases_response
         elif response.status_code == 403:
             raise Exception("Need admin credentials to upload new cases: " + str(response.content))
