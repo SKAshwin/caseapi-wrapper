@@ -1,4 +1,4 @@
-from lcsscaseapi.types import USCircuitCaseMeta
+from lcsscaseapi.types import CaseMeta, USCircuitCaseMeta
 import pytest
 
 def test_eq():
@@ -147,7 +147,56 @@ def test_circuit_num():
     assert obj1.circuit_num() == None
 
 def test_from_dict():
-    pass
+    data = {
+        'case_id': 'X1111',
+        'circuit_name': USCircuitCaseMeta.THIRD_CIRCUIT,
+        'outcome': 'Affirmed (In Part)'
+    }
+
+    ucm  = USCircuitCaseMeta.from_dict(**data)
+    
+    assert ucm == USCircuitCaseMeta(
+        case_id= "X1111",
+        circuit_name =  USCircuitCaseMeta.THIRD_CIRCUIT,
+        outcome = "Affirmed (In Part)"
+    )
+
+def test_from_dict_invalid_circuit():
+    data = {
+        'case_id': 'X1111',
+        'circuit_name': 'Twelfth Court',
+        'outcome': 'Affirmed (In Part)'
+    }
+
+    with pytest.raises(Exception) as e:
+        USCircuitCaseMeta.from_dict(**data)
+     
+    assert str(e.value) == "circuit_name is not a valid circuit name or empty string. Valid names must be one of the following (or an empty string): Federal Circuit, 1st Circuit, 2nd Circuit, 3rd Circuit, 4th Circuit, 5th Circuit, 6th Circuit, 7th Circuit, 8th Circuit, 9th Circuit, 10th Circuit, 11th Circuit, DC Circuit"
+
 
 def test_to_dict():
-    pass
+    ucm  = USCircuitCaseMeta(
+            case_id = "X44DV3",
+            case_name = "Barker v. United States",
+            title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+            doc_title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+            tags = ["WORLD", "HELLO"],
+            circuit_name = USCircuitCaseMeta.ELEVENTH_CIRCUIT
+        )
+
+    # tags should be sorted alphabetically, so the same object always produces the same dictionary
+    data = {
+        'case_id' : "X44DV3",
+        'case_name' : "Barker v. United States",
+        'title' : "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        'doc_title' : "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        'tags' : ["HELLO", "WORLD"],
+        'circuit_name' : USCircuitCaseMeta.ELEVENTH_CIRCUIT,
+        'doc_id': '',
+        'doc_type': '',
+        'docket_number': '',
+        'outcome': '',
+        'self_cite': ''
+    }
+
+    assert ucm.to_dict() == data

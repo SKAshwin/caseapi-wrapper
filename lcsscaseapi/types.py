@@ -97,6 +97,7 @@ class USCircuitCaseMeta(CaseMeta):
         data_dict = dict(self.__dict__) # make a copy, so as to not edit the original copy
         # print(data_dict)
         data_dict["circuit_name"] = data_dict["_circuit_name"]
+        data_dict["tags"].sort()
         del data_dict["_circuit_name"]
         return data_dict
 
