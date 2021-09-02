@@ -1,8 +1,10 @@
 import json
+from django.core.serializers.json import DjangoJSONEncoder
+
 
 class CaseMeta:
     def __init__(self, case_id = "", case_name = "", title = "", doc_title = "", doc_id = "", doc_type = "", docket_number = "", outcome = "",
-                    self_cite = "", tags = []):
+                    self_cite = "", tags = [], date = None):
         self.case_id = case_id
         self.case_name = case_name
         self.title = title
@@ -12,6 +14,7 @@ class CaseMeta:
         self.docket_number = docket_number
         self.outcome = outcome
         self.self_cite = self_cite
+        self.date = date
         self.tags = tags
         self.tags.sort()
     
@@ -30,7 +33,7 @@ class CaseMeta:
     
     def __str__(self):
         # be careful with this - if some key's values should be hidden in a future change make sure to change this method
-        return json.dumps(self.__dict__, sort_keys=True)
+        return json.dumps(self.__dict__, sort_keys=True, cls=DjangoJSONEncoder)
     
     def __repr__(self):
         return "CaseMeta Object: " + str(self)
@@ -48,6 +51,7 @@ class CaseMeta:
         cm.outcome = fields.get("outcome", "")
         cm.self_cite = fields.get("self_cite", "")
         cm.tags = fields.get("tags", [])
+        cm.date = fields.get("date", None)
         return cm
 
 
@@ -68,8 +72,8 @@ class USCircuitCaseMeta(CaseMeta):
     CIRCUITS = [FED_CIRCUIT, FIRST_CIRCUIT, SECOND_CIRCUIT, THIRD_CIRCUIT, FOURTH_CIRCUIT, FIFTH_CIRCUIT, SIXTH_CIRCUIT, SEVENTH_CIRCUIT, 
                 EIGHTH_CIRCUIT, NINTH_CIRCUIT, TENTH_CIRCUIT, ELEVENTH_CIRCUIT, DC_CIRCUIT]
     def __init__(self, case_id = "", case_name = "", title = "", doc_title = "", doc_id = "", doc_type = "", docket_number = "", outcome = "",
-                    self_cite = "", tags = [], circuit_name = ""):
-        super().__init__(case_id, case_name, title, doc_title, doc_id, doc_type, docket_number, outcome, self_cite, tags)
+                    self_cite = "", tags = [], date = None, circuit_name = ""):
+        super().__init__(case_id, case_name, title, doc_title, doc_id, doc_type, docket_number, outcome, self_cite, tags, date)
         self.circuit_name = circuit_name
 
     @property
@@ -103,7 +107,7 @@ class USCircuitCaseMeta(CaseMeta):
 
     # overriding this suffices to change behavior of eq and neq as well
     def __str__(self):
-        return json.dumps(self.to_dict(), sort_keys=True)
+        return json.dumps(self.to_dict(), sort_keys=True, cls=DjangoJSONEncoder)
         
     @classmethod
     def from_dict(self, **fields):

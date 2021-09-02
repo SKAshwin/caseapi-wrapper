@@ -196,7 +196,8 @@ def test_to_dict():
         'doc_type': '',
         'docket_number': '',
         'outcome': '',
-        'self_cite': ''
+        'self_cite': '',
+        'date': None
     }
 
     assert ucm.to_dict() == data

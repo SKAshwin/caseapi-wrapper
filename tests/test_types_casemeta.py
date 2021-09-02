@@ -1,5 +1,6 @@
 from .context import lcsscaseapi
 from lcsscaseapi.types import CaseMeta
+import datetime
 
 def test_eq():
     obj1 = CaseMeta(
@@ -10,7 +11,8 @@ def test_eq():
         doc_id = "X44DV3",
         doc_type = "OPINIONS",
         docket_number = "13181",
-        outcome = "Judgment Affirmed"
+        outcome = "Judgment Affirmed",
+        date = datetime.date(1952, 10, 12)
     )
 
     obj2 = CaseMeta(
@@ -25,6 +27,7 @@ def test_eq():
     )
 
     obj2.case_id = "X44DV3"
+    obj2.date = datetime.date(1952, 10, 12)
 
     assert obj1 == obj2
 
@@ -87,18 +90,20 @@ def test_neq():
         doc_id = "X44DV3",
         doc_type = "OPINIONS",
         docket_number = "13181",
-        outcome = "Judgment Affirmed"
+        outcome = "Judgment Affirmed",
+        date = datetime.date(1968, 12, 12)
     )
 
     obj2 = CaseMeta(
-        case_id = "blah",
+        case_id = "X44DV3",
         case_name = "Barker v. United States",
         title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         doc_title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         doc_id = "X44DV3",
         doc_type = "OPINIONS",
         docket_number = "13181",
-        outcome = "Judgment Affirmed"
+        outcome = "Judgment Affirmed",
+        date = datetime.date(1965, 12, 10)
     )
 
     assert obj1 != obj2
@@ -113,7 +118,8 @@ def test_from_dict():
         "case_name": "Barker v. United States",
         "title": "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         "doc_title": "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
-        "doc_id": "X44DV3"
+        "doc_id": "X44DV3",
+        "date": datetime.date(1965, 12, 10)
     }
     cm = CaseMeta.from_dict(**case_info)
     expected = CaseMeta(
@@ -124,7 +130,8 @@ def test_from_dict():
         doc_id = "X44DV3",
         doc_type = "OPINIONS",
         docket_number = "13181",
-        outcome = "Judgment Affirmed"
+        outcome = "Judgment Affirmed",
+        date = datetime.date(1965, 12, 10)
     )
     assert cm == expected
 
@@ -141,7 +148,8 @@ def test_from_dict_irrelevant_fields():
         "title": "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         "doc_title": "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         "doc_id": "X44DV3",
-        "something_else": "shouldn't be here"
+        "something_else": "shouldn't be here",
+        "date":datetime.date(1965, 12, 10)
     }
     cm = CaseMeta.from_dict(**case_info)
     expected = CaseMeta(
@@ -152,7 +160,8 @@ def test_from_dict_irrelevant_fields():
         doc_id = "X44DV3",
         doc_type = "OPINIONS",
         docket_number = "13181",
-        outcome = "Judgment Affirmed"
+        outcome = "Judgment Affirmed",
+        date = datetime.date(1965, 12, 10)
     )
     assert cm == expected
     assert not hasattr(cm, 'something_else')
