@@ -216,11 +216,11 @@ def test_to_json_dict():
         'doc_title' : "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         'tags' : ["HELLO", "WORLD"],
         'circuit_name' : USCircuitCaseMeta.ELEVENTH_CIRCUIT,
-        'doc_id': '',
-        'doc_type': '',
-        'docket_number': '',
-        'outcome': '',
-        'self_cite': '',
+        'doc_id': None,
+        'doc_type': None,
+        'docket_number': None,
+        'outcome': None,
+        'self_cite': None,
         'date': '1984-08-05'
     }
 
@@ -245,10 +245,10 @@ def test_to_json_dict_no_date():
         'doc_title' : "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         'tags' : ["HELLO", "WORLD"],
         'circuit_name' : USCircuitCaseMeta.ELEVENTH_CIRCUIT,
-        'doc_id': '',
-        'doc_type': '',
-        'docket_number': '',
-        'outcome': '',
+        'doc_id': None,
+        'doc_type': None,
+        'docket_number': None,
+        'outcome': None,
         'self_cite': None,
         'date': None
     }

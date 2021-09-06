@@ -4,8 +4,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 
 class CaseMeta:
-    def __init__(self, case_id = "", case_name = "", title = "", doc_title = "", doc_id = "", doc_type = "", docket_number = "", outcome = "",
-                    self_cite = "", tags = [], date = None):
+    def __init__(self, case_id = None, case_name = None, title = None, doc_title = None, doc_id = None, doc_type = None, docket_number = None, outcome = None,
+                    self_cite = None, tags = [], date = None):
         self.case_id = case_id
         self.case_name = case_name
         self.title = title
@@ -42,15 +42,15 @@ class CaseMeta:
     @classmethod
     def from_json_dict(self, fields):
         cm = self()
-        cm.case_id = fields.get("case_id", "")
-        cm.case_name = fields.get("case_name", "")
-        cm.title = fields.get("title", "")
-        cm.doc_title = fields.get("doc_title", "")
-        cm.doc_id = fields.get("doc_id", "")
-        cm.doc_type = fields.get("doc_type", "")
-        cm.docket_number = fields.get("docket_number", "")
-        cm.outcome = fields.get("outcome", "")
-        cm.self_cite = fields.get("self_cite", "")
+        cm.case_id = fields.get("case_id", None)
+        cm.case_name = fields.get("case_name", None)
+        cm.title = fields.get("title", None)
+        cm.doc_title = fields.get("doc_title", None)
+        cm.doc_id = fields.get("doc_id", None)
+        cm.doc_type = fields.get("doc_type", None)
+        cm.docket_number = fields.get("docket_number", None)
+        cm.outcome = fields.get("outcome", None)
+        cm.self_cite = fields.get("self_cite", None)
         cm.tags = fields.get("tags", [])
         datestring = fields.get("date", None)
         if datestring != None:
@@ -78,8 +78,8 @@ class USCircuitCaseMeta(CaseMeta):
     DC_CIRCUIT = "DC Circuit"
     CIRCUITS = [FED_CIRCUIT, FIRST_CIRCUIT, SECOND_CIRCUIT, THIRD_CIRCUIT, FOURTH_CIRCUIT, FIFTH_CIRCUIT, SIXTH_CIRCUIT, SEVENTH_CIRCUIT, 
                 EIGHTH_CIRCUIT, NINTH_CIRCUIT, TENTH_CIRCUIT, ELEVENTH_CIRCUIT, DC_CIRCUIT]
-    def __init__(self, case_id = "", case_name = "", title = "", doc_title = "", doc_id = "", doc_type = "", docket_number = "", outcome = "",
-                    self_cite = "", tags = [], date = None, circuit_name = None):
+    def __init__(self, case_id = None, case_name = None, title = None, doc_title = None, doc_id = None, doc_type = None, docket_number = None, outcome = None,
+                    self_cite = None, tags = [], date = None, circuit_name = None):
         super().__init__(case_id, case_name, title, doc_title, doc_id, doc_type, docket_number, outcome, self_cite, tags, date)
         self.circuit_name = circuit_name
 
