@@ -79,7 +79,7 @@ class USCircuitCaseMeta(CaseMeta):
     CIRCUITS = [FED_CIRCUIT, FIRST_CIRCUIT, SECOND_CIRCUIT, THIRD_CIRCUIT, FOURTH_CIRCUIT, FIFTH_CIRCUIT, SIXTH_CIRCUIT, SEVENTH_CIRCUIT, 
                 EIGHTH_CIRCUIT, NINTH_CIRCUIT, TENTH_CIRCUIT, ELEVENTH_CIRCUIT, DC_CIRCUIT]
     def __init__(self, case_id = "", case_name = "", title = "", doc_title = "", doc_id = "", doc_type = "", docket_number = "", outcome = "",
-                    self_cite = "", tags = [], date = None, circuit_name = ""):
+                    self_cite = "", tags = [], date = None, circuit_name = None):
         super().__init__(case_id, case_name, title, doc_title, doc_id, doc_type, docket_number, outcome, self_cite, tags, date)
         self.circuit_name = circuit_name
 
@@ -89,8 +89,8 @@ class USCircuitCaseMeta(CaseMeta):
     
     @circuit_name.setter
     def circuit_name(self, val):
-        if val not in USCircuitCaseMeta.CIRCUITS and val != "":
-            raise Exception("circuit_name is not a valid circuit name or empty string. Valid names must be one of the following (or an empty string): " 
+        if val not in USCircuitCaseMeta.CIRCUITS and val != None:
+            raise Exception("circuit_name is not a valid circuit name or None. Valid names must be one of the following (or a None): " 
                                         + ", ".join(USCircuitCaseMeta.CIRCUITS))
         self._circuit_name = val
 
@@ -99,7 +99,7 @@ class USCircuitCaseMeta(CaseMeta):
     # The DC circuit is returned as 12
     # If no circuit is associated with this case, None is returned
     def circuit_num(self):
-        if self.circuit_name == "":
+        if self.circuit_name == None:
             return None
         return USCircuitCaseMeta.CIRCUITS.index(self.circuit_name)
 
@@ -123,7 +123,7 @@ class USCircuitCaseMeta(CaseMeta):
         case_meta = super().from_json_dict(fields)
         us_case = USCircuitCaseMeta()
         us_case.__dict__ = case_meta.__dict__ # copy over all attributes from the casemeta object
-        us_case.circuit_name = fields.get("circuit_name", "")
+        us_case.circuit_name = fields.get("circuit_name", None)
 
         return us_case
         

@@ -103,7 +103,7 @@ def test_invalid_circuit_constructor():
             tags = ["WORLD", "HELLO"],
             circuit_name = "12th Circuit"
         )
-    assert str(e.value) == "circuit_name is not a valid circuit name or empty string. Valid names must be one of the following (or an empty string): Federal Circuit, 1st Circuit, 2nd Circuit, 3rd Circuit, 4th Circuit, 5th Circuit, 6th Circuit, 7th Circuit, 8th Circuit, 9th Circuit, 10th Circuit, 11th Circuit, DC Circuit"
+    assert str(e.value) == "circuit_name is not a valid circuit name or None. Valid names must be one of the following (or a None): Federal Circuit, 1st Circuit, 2nd Circuit, 3rd Circuit, 4th Circuit, 5th Circuit, 6th Circuit, 7th Circuit, 8th Circuit, 9th Circuit, 10th Circuit, 11th Circuit, DC Circuit"
 
 def test_circuit_setter():
     # check that the circuit_name setter only accepts certain valid options
@@ -122,10 +122,10 @@ def test_circuit_setter():
     with pytest.raises(Exception) as e:
         obj1.circuit_name = "13th Circuit"
     
-    assert str(e.value) == "circuit_name is not a valid circuit name or empty string. Valid names must be one of the following (or an empty string): Federal Circuit, 1st Circuit, 2nd Circuit, 3rd Circuit, 4th Circuit, 5th Circuit, 6th Circuit, 7th Circuit, 8th Circuit, 9th Circuit, 10th Circuit, 11th Circuit, DC Circuit"
+    assert str(e.value) == "circuit_name is not a valid circuit name or None. Valid names must be one of the following (or a None): Federal Circuit, 1st Circuit, 2nd Circuit, 3rd Circuit, 4th Circuit, 5th Circuit, 6th Circuit, 7th Circuit, 8th Circuit, 9th Circuit, 10th Circuit, 11th Circuit, DC Circuit"
 
-    obj1.circuit_name = ""
-    assert obj1.circuit_name == ""
+    obj1.circuit_name = None
+    assert obj1.circuit_name == None
 
 def test_circuit_num():
     # test that the circuit_num method works as expected
@@ -144,7 +144,7 @@ def test_circuit_num():
 
     assert obj1.circuit_num() == 1
 
-    obj1.circuit_name = ""
+    obj1.circuit_name = None
     assert obj1.circuit_num() == None
 
 def test_from_json_dict():
@@ -176,8 +176,26 @@ def test_from_json_dict_invalid_circuit():
     with pytest.raises(Exception) as e:
         USCircuitCaseMeta.from_json_dict(data)
      
-    assert str(e.value) == "circuit_name is not a valid circuit name or empty string. Valid names must be one of the following (or an empty string): Federal Circuit, 1st Circuit, 2nd Circuit, 3rd Circuit, 4th Circuit, 5th Circuit, 6th Circuit, 7th Circuit, 8th Circuit, 9th Circuit, 10th Circuit, 11th Circuit, DC Circuit"
+    assert str(e.value) == "circuit_name is not a valid circuit name or None. Valid names must be one of the following (or a None): Federal Circuit, 1st Circuit, 2nd Circuit, 3rd Circuit, 4th Circuit, 5th Circuit, 6th Circuit, 7th Circuit, 8th Circuit, 9th Circuit, 10th Circuit, 11th Circuit, DC Circuit"
 
+def test_from_json_dict_no_circuit():
+    data = {
+        'case_id': 'X1111',
+        'circuit_name': None,
+        'outcome': 'Affirmed (In Part)',
+        'date': '1972-03-01',
+        'self_cite': None
+    }
+
+    ucm  = USCircuitCaseMeta.from_json_dict(data)
+    
+    assert ucm == USCircuitCaseMeta(
+        case_id= "X1111",
+        circuit_name =  None,
+        outcome = "Affirmed (In Part)",
+        date = datetime.date(1972,3,1),
+        self_cite = None
+    )
 
 def test_to_json_dict():
     ucm  = USCircuitCaseMeta(
