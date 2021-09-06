@@ -24,19 +24,19 @@ class LCSSClient:
                             headers={"Authorization":"Token " + self._token})
         if response.status_code == 200:
             cases_dict = response.json() # the json array of case objects will be converted to an array of dictionaries
-            cases = [CaseMeta.from_dict(**case_json) for case_json in cases_dict]
+            cases = [CaseMeta.from_json_dict(case_json) for case_json in cases_dict]
             return cases
         else:
             raise Exception("Unknown error, see response from server: " + str(response.content))
 
     def upload_us_cases(self, cases):
-        json_data = [case.to_dict() for case in cases]
+        json_data = [case.to_json_dict() for case in cases]
         response = requests.post('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, 
                         headers={"Authorization":"Token " + self._token},
                         json = json_data)
         if response.status_code == 201:
             cases_dict = response.json() # the json array of case objects will be converted to an array of dictionaries
-            cases_response = [USCircuitCaseMeta.from_dict(**case_json) for case_json in cases_dict] # json response reutrns the cases just created
+            cases_response = [USCircuitCaseMeta.from_json_dict(case_json) for case_json in cases_dict] # json response reutrns the cases just created
             return cases_response
         elif response.status_code == 403:
             raise Exception("Need admin credentials to upload new cases: " + str(response.content))

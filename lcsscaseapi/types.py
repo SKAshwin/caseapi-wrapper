@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from django.core.serializers.json import DjangoJSONEncoder
 
 
@@ -39,7 +40,7 @@ class CaseMeta:
         return "CaseMeta Object: " + str(self)
 
     @classmethod
-    def from_dict(self, **fields):
+    def from_json_dict(self, fields):
         cm = self()
         cm.case_id = fields.get("case_id", "")
         cm.case_name = fields.get("case_name", "")
@@ -51,7 +52,13 @@ class CaseMeta:
         cm.outcome = fields.get("outcome", "")
         cm.self_cite = fields.get("self_cite", "")
         cm.tags = fields.get("tags", [])
-        cm.date = fields.get("date", None)
+        datestring = fields.get("date", None)
+        if datestring != None:
+            print(datestring)
+            print(fields)
+            cm.date = datetime.strptime(datestring, '%Y-%m-%d').date()
+        else:
+            cm.date = None
         return cm
 
 
@@ -97,21 +104,23 @@ class USCircuitCaseMeta(CaseMeta):
         return USCircuitCaseMeta.CIRCUITS.index(self.circuit_name)
 
     # converts this object to a dictionary, correcting the _circuit_name
-    def to_dict(self):
+    def to_json_dict(self):
         data_dict = dict(self.__dict__) # make a copy, so as to not edit the original copy
         # print(data_dict)
         data_dict["circuit_name"] = data_dict["_circuit_name"]
         data_dict["tags"].sort()
         del data_dict["_circuit_name"]
+        if data_dict["date"] != None:
+            data_dict["date"] = json.dumps(data_dict["date"], cls=DjangoJSONEncoder).strip('\"')
         return data_dict
 
     # overriding this suffices to change behavior of eq and neq as well
     def __str__(self):
-        return json.dumps(self.to_dict(), sort_keys=True, cls=DjangoJSONEncoder)
+        return json.dumps(self.to_json_dict(), sort_keys=True, cls=DjangoJSONEncoder)
         
     @classmethod
-    def from_dict(self, **fields):
-        case_meta = super().from_dict(**fields)
+    def from_json_dict(self, fields):
+        case_meta = super().from_json_dict(fields)
         us_case = USCircuitCaseMeta()
         us_case.__dict__ = case_meta.__dict__ # copy over all attributes from the casemeta object
         us_case.circuit_name = fields.get("circuit_name", "")

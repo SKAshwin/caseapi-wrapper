@@ -3,6 +3,7 @@ from lcsscaseapi.client import LCSSClient
 from lcsscaseapi.types import CaseMeta, USCircuitCaseMeta
 from lcsscaseapi import constants
 import pytest
+import datetime
 
 def test_init_successful(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "hi"})
@@ -69,7 +70,7 @@ def test_search_cases(requests_mock):
             "outcome": "Judgment Reversed"
         }
     ]
-    returncasemeta = [CaseMeta.from_dict(**x) for x in returnjson]
+    returncasemeta = [CaseMeta.from_json_dict(x) for x in returnjson]
     requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, json = returnjson, status_code=200)
     cases = client.search_cases(title="9th Cir.")
 
@@ -102,7 +103,7 @@ def test_search_cases_multiple_args(requests_mock):
             "outcome": "Judgment Reversed"
         }
     ]
-    returncasemeta = [CaseMeta.from_dict(**x) for x in returnjson]
+    returncasemeta = [CaseMeta.from_json_dict(x) for x in returnjson]
     requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, json = returnjson, status_code=200)
     cases = client.search_cases(title="9th Cir.", doc_id="X44")
 
@@ -128,10 +129,11 @@ def test_search_cases_error(requests_mock):
 def test_upload_us_cases(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
     client = LCSSClient(username="testing", password="123")
-    new_cases = [USCircuitCaseMeta(case_id="X1111"), USCircuitCaseMeta(case_id="X2222", tags = ["HELLO", "WORLD"])]
+    new_cases = [USCircuitCaseMeta(case_id="X1111", date = datetime.date(1964, 10, 20)), USCircuitCaseMeta(case_id="X2222", tags = ["HELLO", "WORLD"])]
     new_cases_json = [
         {
-            "case_id":"X1111"
+            "case_id":"X1111",
+            "date": "1964-10-20"
         },
         {
             "case_id":"X2222",
@@ -143,7 +145,7 @@ def test_upload_us_cases(requests_mock):
 
     assert cases == new_cases
     assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
-    assert [USCircuitCaseMeta.from_dict(**case_json) for case_json in requests_mock.request_history[-1].json()] == new_cases
+    assert [USCircuitCaseMeta.from_json_dict(case_json) for case_json in requests_mock.request_history[-1].json()] == new_cases
     assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
 
 def test_upload_us_cases_non_admin(requests_mock):

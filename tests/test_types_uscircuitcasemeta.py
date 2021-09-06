@@ -1,4 +1,5 @@
 from lcsscaseapi.types import CaseMeta, USCircuitCaseMeta
+import datetime
 import pytest
 
 def test_eq():
@@ -146,22 +147,26 @@ def test_circuit_num():
     obj1.circuit_name = ""
     assert obj1.circuit_num() == None
 
-def test_from_dict():
+def test_from_json_dict():
     data = {
         'case_id': 'X1111',
         'circuit_name': USCircuitCaseMeta.THIRD_CIRCUIT,
-        'outcome': 'Affirmed (In Part)'
+        'outcome': 'Affirmed (In Part)',
+        'date': '1972-03-01',
+        'self_cite': None
     }
 
-    ucm  = USCircuitCaseMeta.from_dict(**data)
+    ucm  = USCircuitCaseMeta.from_json_dict(data)
     
     assert ucm == USCircuitCaseMeta(
         case_id= "X1111",
         circuit_name =  USCircuitCaseMeta.THIRD_CIRCUIT,
-        outcome = "Affirmed (In Part)"
+        outcome = "Affirmed (In Part)",
+        date = datetime.date(1972,3,1),
+        self_cite = None
     )
 
-def test_from_dict_invalid_circuit():
+def test_from_json_dict_invalid_circuit():
     data = {
         'case_id': 'X1111',
         'circuit_name': 'Twelfth Court',
@@ -169,19 +174,20 @@ def test_from_dict_invalid_circuit():
     }
 
     with pytest.raises(Exception) as e:
-        USCircuitCaseMeta.from_dict(**data)
+        USCircuitCaseMeta.from_json_dict(data)
      
     assert str(e.value) == "circuit_name is not a valid circuit name or empty string. Valid names must be one of the following (or an empty string): Federal Circuit, 1st Circuit, 2nd Circuit, 3rd Circuit, 4th Circuit, 5th Circuit, 6th Circuit, 7th Circuit, 8th Circuit, 9th Circuit, 10th Circuit, 11th Circuit, DC Circuit"
 
 
-def test_to_dict():
+def test_to_json_dict():
     ucm  = USCircuitCaseMeta(
             case_id = "X44DV3",
             case_name = "Barker v. United States",
             title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
             doc_title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
             tags = ["WORLD", "HELLO"],
-            circuit_name = USCircuitCaseMeta.ELEVENTH_CIRCUIT
+            circuit_name = USCircuitCaseMeta.ELEVENTH_CIRCUIT,
+            date = datetime.date(1984,8,5)
         )
 
     # tags should be sorted alphabetically, so the same object always produces the same dictionary
@@ -197,7 +203,37 @@ def test_to_dict():
         'docket_number': '',
         'outcome': '',
         'self_cite': '',
+        'date': '1984-08-05'
+    }
+
+    assert ucm.to_json_dict() == data
+
+def test_to_json_dict_no_date():
+    ucm  = USCircuitCaseMeta(
+            case_id = "X44DV3",
+            case_name = "Barker v. United States",
+            title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+            doc_title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+            tags = ["WORLD", "HELLO"],
+            circuit_name = USCircuitCaseMeta.ELEVENTH_CIRCUIT,
+            self_cite = None
+        )
+
+    # tags should be sorted alphabetically, so the same object always produces the same dictionary
+    data = {
+        'case_id' : "X44DV3",
+        'case_name' : "Barker v. United States",
+        'title' : "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        'doc_title' : "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        'tags' : ["HELLO", "WORLD"],
+        'circuit_name' : USCircuitCaseMeta.ELEVENTH_CIRCUIT,
+        'doc_id': '',
+        'doc_type': '',
+        'docket_number': '',
+        'outcome': '',
+        'self_cite': None,
         'date': None
     }
 
-    assert ucm.to_dict() == data
+    assert ucm.to_json_dict() == data
+    

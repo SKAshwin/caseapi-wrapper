@@ -108,7 +108,7 @@ def test_neq():
 
     assert obj1 != obj2
 
-def test_from_dict():
+def test_from_json_dict():
     # intentionally out of the usual order
     case_info = {
         "doc_type": "OPINIONS",
@@ -119,9 +119,9 @@ def test_from_dict():
         "title": "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         "doc_title": "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         "doc_id": "X44DV3",
-        "date": datetime.date(1965, 12, 10)
+        "date": "1965-12-10"
     }
-    cm = CaseMeta.from_dict(**case_info)
+    cm = CaseMeta.from_json_dict(case_info)
     expected = CaseMeta(
          case_id = "X44DV3",
         case_name = "Barker v. United States",
@@ -135,8 +135,8 @@ def test_from_dict():
     )
     assert cm == expected
 
-def test_from_dict_irrelevant_fields():
-    # tests that irrelevant fields are ignored when supplied in a dictionary to from_dict
+def test_from_json_dict_irrelevant_fields():
+    # tests that irrelevant fields are ignored when supplied in a dictionary to from_json_dict
 
      # intentionally out of the usual order
     case_info = {
@@ -149,9 +149,9 @@ def test_from_dict_irrelevant_fields():
         "doc_title": "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         "doc_id": "X44DV3",
         "something_else": "shouldn't be here",
-        "date":datetime.date(1965, 12, 10)
+        "date": "1965-12-10"
     }
-    cm = CaseMeta.from_dict(**case_info)
+    cm = CaseMeta.from_json_dict(case_info)
     expected = CaseMeta(
         case_id = "X44DV3",
         case_name = "Barker v. United States",
@@ -166,7 +166,7 @@ def test_from_dict_irrelevant_fields():
     assert cm == expected
     assert not hasattr(cm, 'something_else')
 
-def test_from_dict_missing_fiels():
+def test_from_json_dict_missing_fiels():
     # tests that leaving some fields out doesn't trigger an error
 
     case_info = {
@@ -178,7 +178,7 @@ def test_from_dict_missing_fiels():
         "doc_title": "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
         "something_else": "shouldn't be here"
     }
-    cm = CaseMeta.from_dict(**case_info)
+    cm = CaseMeta.from_json_dict(case_info)
     expected = CaseMeta(
         case_id = "X44DV3",
         case_name = "Barker v. United States",
