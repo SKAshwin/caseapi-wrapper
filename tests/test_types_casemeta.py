@@ -166,7 +166,7 @@ def test_from_json_dict_irrelevant_fields():
     assert cm == expected
     assert not hasattr(cm, 'something_else')
 
-def test_from_json_dict_missing_fiels():
+def test_from_json_dict_missing_fields():
     # tests that leaving some fields out doesn't trigger an error
 
     case_info = {
