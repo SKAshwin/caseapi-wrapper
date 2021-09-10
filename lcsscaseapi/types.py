@@ -30,7 +30,7 @@ class CaseMeta:
         return str(self) == str(other)
 
     def __neq__(self, other):
-            return not str(self) == str(other)
+            return not self.__eq__(other)
     
     def __str__(self):
         # be careful with this - if some key's values should be hidden in a future change make sure to change this method
@@ -127,3 +127,56 @@ class USCircuitCaseMeta(CaseMeta):
 
         return us_case
         
+
+class Judge:
+    MALE = "Male"
+    FEMALE = "Female"
+    GENDERS = [MALE, FEMALE]
+    def __init__(self, id=None, gender=None, name = None, orig_name=None):
+        self.id = id
+        self.judge_gender = gender
+        self.judge_name = name
+        self.judge_orig_name = orig_name
+
+    @property
+    def judge_gender(self):
+        return self._judge_gender
+    
+    @judge_gender.setter
+    def judge_gender(self, val):
+        if val not in Judge.GENDERS and val != None:
+            raise Exception("Gender must be Male, Female or None")
+        self._judge_gender = val
+
+    def __eq__(self, other):
+        if other is None:
+            return False
+        if not isinstance(other, CaseMeta):
+            return NotImplemented
+     
+        return str(self) == str(other)
+
+    def __neq__(self, other):
+            return not self.__eq__(other)
+    
+    def __str__(self):
+        # be careful with this - if some key's values should be hidden in a future change make sure to change this method
+        return json.dumps(self.to_json_dict(), sort_keys=True, cls=DjangoJSONEncoder) # DjangoJSONEncoder makes sure dates are handled in the right format
+    
+    def __repr__(self):
+        return "Judge Object: " + str(self)
+    
+      # converts this object to a dictionary, correcting the _judge_gender
+    def to_json_dict(self):
+        data_dict = dict(self.__dict__) # make a copy, so as to not edit the original dict
+        data_dict["judge_gender"] = data_dict["_judge_gender"]
+        del data_dict["_judge_gender"]
+        return data_dict
+
+    @classmethod
+    def from_json_dict(self, fields):
+        judge = self()
+        judge.id = fields.id
+        judge.judge_gender = fields.judge_gender
+        judge.judge_name = fields.judge_name 
+        judge.judge_orig_name = fields.judge_orig_name
