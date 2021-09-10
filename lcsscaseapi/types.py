@@ -176,7 +176,9 @@ class Judge:
     @classmethod
     def from_json_dict(self, fields):
         judge = self()
-        judge.id = fields.id
-        judge.judge_gender = fields.judge_gender
-        judge.judge_name = fields.judge_name 
-        judge.judge_orig_name = fields.judge_orig_name
+        judge.id = fields.get("id", None)
+        judge.judge_gender = fields.get("judge_gender", None)
+        judge.judge_name = fields.get("judge_name", None)
+        judge.judge_orig_name = fields.get("judge_orig_name", None)
+
+        return judge
