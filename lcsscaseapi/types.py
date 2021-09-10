@@ -164,7 +164,7 @@ class Judge:
         return json.dumps(self.to_json_dict(), sort_keys=True, cls=DjangoJSONEncoder) # DjangoJSONEncoder makes sure dates are handled in the right format
     
     def __repr__(self):
-        return "Judge Object: " + str(self)
+        return self.__class__.__name__ + " Object: " + str(self)
     
       # converts this object to a dictionary, correcting the _judge_gender
     def to_json_dict(self):
@@ -182,3 +182,31 @@ class Judge:
         judge.judge_orig_name = fields.get("judge_orig_name", None)
 
         return judge
+
+
+class USJudge(Judge):
+    DEMOCRAT = "Democrat"
+    REPUBLICAN = "Republican"
+    PARTIES = [DEMOCRAT, REPUBLICAN]
+    def __init__(self, id = None, name = None, orig_name = None, gender = None, senior = None, party = None):
+        super().__init__(id=id, name=name, orig_name=orig_name, gender=gender)
+        self.senior = senior
+        self.party = party
+    
+    @property
+    def party(self):
+        return self._party
+
+    @party.setter
+    def party(self, val):
+        if val not in USJudge.PARTIES and val != None:
+            raise Exception("Party must be Democrat, Republican or None")
+        self._party = val
+
+    # overriding this is sufficient to fix __str__, __eq__ etc
+    def to_json_dict(self):
+        data_dict  = super().to_json_dict()
+        data_dict["party"] = data_dict["_party"]
+        del data_dict["_party"]
+        return data_dict
+    
