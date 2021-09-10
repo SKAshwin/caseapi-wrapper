@@ -151,7 +151,7 @@ class Judge:
     def __eq__(self, other):
         if other is None:
             return False
-        if not isinstance(other, CaseMeta):
+        if not isinstance(other, Judge):
             return NotImplemented
      
         return str(self) == str(other)
