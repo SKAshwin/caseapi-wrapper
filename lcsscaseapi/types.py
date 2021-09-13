@@ -37,7 +37,7 @@ class CaseMeta:
         return json.dumps(self.__dict__, sort_keys=True, cls=DjangoJSONEncoder)
     
     def __repr__(self):
-        return "CaseMeta Object: " + str(self)
+        return self.__class__.__name__ + " Object: " + str(self)
 
     @classmethod
     def from_json_dict(self, fields):
