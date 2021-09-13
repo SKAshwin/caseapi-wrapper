@@ -54,8 +54,6 @@ class CaseMeta:
         cm.tags = fields.get("tags", [])
         datestring = fields.get("date", None)
         if datestring != None:
-            print(datestring)
-            print(fields)
             cm.date = datetime.strptime(datestring, '%Y-%m-%d').date()
         else:
             cm.date = None
@@ -106,7 +104,6 @@ class USCircuitCaseMeta(CaseMeta):
     # converts this object to a dictionary, correcting the _circuit_name
     def to_json_dict(self):
         data_dict = dict(self.__dict__) # make a copy, so as to not edit the original copy
-        # print(data_dict)
         data_dict["circuit_name"] = data_dict["_circuit_name"]
         data_dict["tags"].sort()
         del data_dict["_circuit_name"]
