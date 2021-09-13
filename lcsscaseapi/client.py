@@ -1,5 +1,5 @@
 from lcsscaseapi import constants
-from lcsscaseapi.types import CaseMeta, USCircuitCaseMeta
+from lcsscaseapi.types import CaseMeta, USCircuitCaseMeta, USJudge
 import requests
 import json
 
@@ -30,18 +30,27 @@ class LCSSClient:
             raise Exception("Unknown error, see response from server: " + str(response.content))
 
     def upload_us_cases(self, cases):
-        json_data = [case.to_json_dict() for case in cases]
-        response = requests.post('https://' + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, 
+        return self._upload_generic_object(cases, constants.CIRCUIT_CASE_ENDPOINT, USCircuitCaseMeta)
+        
+    def upload_us_judges(self, judges):
+        return self._upload_generic_object(judges, constants.US_JUDGE_ENDPOINT, USJudge)
+
+
+    # For internal use only
+    # a bunch of the upload-x objects are basically identical, so they each call this internal function
+    def _upload_generic_object(self, objects, endpoint, class_object):
+        json_data = [object.to_json_dict() for object in objects]
+        response = requests.post('https://' + constants.DOMAIN_NAME + endpoint, 
                         headers={"Authorization":"Token " + self._token},
                         json = json_data)
         if response.status_code == 201:
-            cases_dict = response.json() # the json array of case objects will be converted to an array of dictionaries
-            cases_response = [USCircuitCaseMeta.from_json_dict(case_json) for case_json in cases_dict] # json response reutrns the cases just created
-            return cases_response
+            objects_dict = response.json() # the json array of case objects will be converted to an array of dictionaries
+            objects_response = [class_object.from_json_dict(case_json) for case_json in objects_dict] # json response reutrns the cases just created
+            return objects_response
         elif response.status_code == 403:
-            raise Exception("Need admin credentials to upload new cases: " + str(response.content))
+            raise Exception("Need admin credentials to upload new " + class_object.__name__ + ": " + str(response.content))
         elif response.status_code == 400:
-            raise Exception("Invalid case object, see: " + str(response.content))
+            raise Exception("Invalid " + class_object.__name__  + " object, see: " + str(response.content))
         else:
             raise Exception("Unknown error, see response from server: " + str(response.content))
         

@@ -153,7 +153,7 @@ def test_upload_us_cases_non_admin(requests_mock):
     client = LCSSClient(username="testing", password="123")
     new_cases = [USCircuitCaseMeta(case_id="X1111"), USCircuitCaseMeta(case_id="X2222", tags = ["HELLO", "WORLD"])]
     requests_mock.post("https://" + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, status_code = 403)
-    with pytest.raises(Exception, match="Need admin credentials to upload new cases:*"):
+    with pytest.raises(Exception, match="Need admin credentials to upload new USCircuitCaseMeta:*"):
         client.upload_us_cases(new_cases)
     assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
 
@@ -164,7 +164,7 @@ def test_upload_us_cases_bad_case(requests_mock):
     client = LCSSClient(username="testing", password="123")
     new_cases = [USCircuitCaseMeta(case_id="X1111"), USCircuitCaseMeta(case_id="X2222", tags = ["HELLO", "WORLD"])]
     requests_mock.post("https://" + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, status_code = 400)
-    with pytest.raises(Exception, match="Invalid case object, see:*"):
+    with pytest.raises(Exception, match="Invalid USCircuitCaseMeta object, see:*"):
         client.upload_us_cases(new_cases)
     assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
 
