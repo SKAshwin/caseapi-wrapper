@@ -112,3 +112,8 @@ def test_judge_from_json_dict_invalid_gender():
     with pytest.raises(Exception) as e:
         Judge.from_json_dict(judge_dict)
     assert str(e.value) == "Gender must be Male, Female or None"
+
+def test_judge_repr():
+    judge = Judge(name = "Byelection", orig_name="Hi", gender= Judge.FEMALE)
+
+    assert judge.__repr__() == "Judge Object: " + str(judge)

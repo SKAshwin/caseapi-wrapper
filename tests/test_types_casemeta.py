@@ -188,3 +188,15 @@ def test_from_json_dict_missing_fields():
         outcome = "Judgment Affirmed"
     )
     assert cm == expected
+
+def test_repr():
+    cm = CaseMeta(
+        case_id = "X44DV3",
+        case_name = "Barker v. United States",
+        doc_title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        doc_type = "OPINIONS",
+        docket_number = "13181",
+        outcome = "Judgment Affirmed"
+    )
+
+    assert cm.__repr__() == "CaseMeta Object: " + str(cm)
