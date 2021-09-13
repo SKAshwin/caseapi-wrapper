@@ -54,7 +54,7 @@ class CaseMeta:
         cm.tags = fields.get("tags", [])
         datestring = fields.get("date", None)
         if datestring != None:
-            cm.date = datetime.strptime(datestring, '%Y-%m-%d').date()
+            cm.date = datetime.strptime(datestring, '%Y-%m-%d').date() # dates are strings in JSON parsed dictionaries, need to be parsed into date obj
         else:
             cm.date = None
         return cm
