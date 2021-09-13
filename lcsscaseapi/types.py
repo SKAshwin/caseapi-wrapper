@@ -210,3 +210,13 @@ class USJudge(Judge):
         del data_dict["_party"]
         return data_dict
     
+    @classmethod
+    def from_json_dict(self, fields):
+        judge = super().from_json_dict(fields)
+        usjudge = USJudge()
+        usjudge.__dict__ = dict(judge.__dict__) # copy fields over into US Judge object
+
+        usjudge.senior = fields.get("senior", None)
+        usjudge.party = fields.get("party", None)
+
+        return usjudge
