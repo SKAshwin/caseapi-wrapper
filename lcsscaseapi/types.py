@@ -224,7 +224,7 @@ class JudgeRuling:
     CONCURRING = "Concurring"
     DISSENTING = "Dissenting"
 
-    VOTES = [CONCURRING, DISSENTING]
+    VOTES = [DISSENTING, CONCURRING]
 
     # case_id is a string, of the case a judge ruled on
     # judge_id is an integer, of the judge who ruled on the case
