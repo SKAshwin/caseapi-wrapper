@@ -1,6 +1,6 @@
 from .context import lcsscaseapi
 from lcsscaseapi.client import LCSSClient
-from lcsscaseapi.types import CaseMeta, USCircuitCaseMeta
+from lcsscaseapi.types import CaseMeta, USCircuitCaseMeta, USJudge
 from lcsscaseapi import constants
 import pytest
 import datetime
@@ -176,3 +176,75 @@ def test_upload_us_cases_unknown_error(requests_mock):
     with pytest.raises(Exception, match="Unknown error, see response from server:*"):
         client.upload_us_cases(new_cases)
     assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+
+def test_upload_us_judges(requests_mock):
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    new_judges = [USJudge(name="Hello", gender= USJudge.MALE),USJudge(name="julio", gender= USJudge.FEMALE)]
+    new_judges_JSON = [
+        {
+            "id": 1,
+            "judge_name": "Hello",
+            "judge_gender": USJudge.MALE
+        },
+        {
+            "id": 2,
+            "judge_name": "julio",
+            "judge_gender": USJudge.FEMALE
+        }
+    ]
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.US_JUDGE_ENDPOINT, json = new_judges_JSON, status_code = 201)
+    judges = client.upload_us_judges(new_judges) # the cases you get back will come with their numeric ID, which cannot be set in the upload
+
+
+    assert [USJudge.from_json_dict(judge_json) for judge_json in requests_mock.request_history[-1].json()] == new_judges
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
+
+    # note that the returned judges, unlike the created ones, have an ID field, so check for this
+    new_judges[0].id = 1 
+    new_judges[1].id = 2
+    assert judges == new_judges
+
+def test_upload_us_judges_non_admin(requests_mock):
+    response_json = {
+        "detail": "You do not have permission to perform this action."
+    }
+
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    new_judges = [USJudge(name="Hello", gender= USJudge.MALE),USJudge(name="julio", gender= USJudge.FEMALE)]
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.US_JUDGE_ENDPOINT, json = response_json, status_code = 403)
+    with pytest.raises(Exception, match = "Need admin credentials to upload new USJudge.*You do not have permission to perform this action.*"):
+        client.upload_us_judges(new_judges)
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
+
+def test_upload_us_judges_bad_judge(requests_mock):
+    # at the moment not actually possible to upload a bad judge because sufficient validation is performed by the judge class already
+    # may not hold into the future
+    response_json = [{
+        "some_field": "blah is not a valid choice for this field."
+    },
+    {}
+    ]
+
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    new_judges = [USJudge(name="Hello", party=USJudge.DEMOCRAT),USJudge(name="julio", gender= USJudge.FEMALE)]
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.US_JUDGE_ENDPOINT, json = response_json, status_code = 400)
+    with pytest.raises(Exception, match = "Invalid USJudge object, see.*blah is not a valid choice for this field.*"):
+        client.upload_us_judges(new_judges)
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
+
+def test_upload_us_judges_unknown_error(requests_mock):
+    response_json = {"whatever":"contents of error message"}
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    new_judges = [USJudge(name="Hello", party=USJudge.DEMOCRAT),USJudge(name="julio", gender= USJudge.FEMALE)]
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.US_JUDGE_ENDPOINT, json = response_json, status_code = 500)
+    with pytest.raises(Exception, match = "Unknown error, see response from server.*contents of error message.*"):
+        client.upload_us_judges(new_judges)
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
