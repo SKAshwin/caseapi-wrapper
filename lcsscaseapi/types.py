@@ -217,3 +217,61 @@ class USJudge(Judge):
         usjudge.party = fields.get("party", None)
 
         return usjudge
+    
+
+class JudgeRuling:
+
+    CONCURRING = "Concurring"
+    DISSENTING = "Dissenting"
+
+    VOTES = [CONCURRING, DISSENTING]
+
+    # case_id is a string, of the case a judge ruled on
+    # judge_id is an integer, of the judge who ruled on the case
+    # id is the ID of the ruling; set by the server, cannot be supplied in objects you want to create, or updated
+    # author is bool, indicating whether this judge was the author of the majority opinion on the case
+    # vote is a string, representing how the judge voted (concurring, dissenting)
+    def __init__(self, case_id, judge_id, id=None, author=None, vote=None):
+        self.case_id = case_id
+        self.judge_id = judge_id
+        self.id = id
+        self.author = author
+        self.vote = vote
+
+    @property
+    def vote(self):
+        return self._vote
+
+    @vote.setter
+    def vote(self, val):
+        if val not in JudgeRuling.VOTES and val != None:
+            raise Exception("vote must be Concurring, Dissenting or None")
+        self._vote = val
+    
+    def __eq__(self, other):
+        if other is None:
+            return False
+        if not isinstance(other, JudgeRuling):
+            return NotImplemented
+        
+        self.tags.sort()
+        other.tags.sort()
+        return str(self) == str(other)
+    
+    def __neq__(self, other):
+        return not self.__eq__(other)
+    
+    def __str__(self):
+        # be careful with this - if some key's values should be hidden in a future change make sure to change this method
+        return json.dumps(self.to_json_dict(), sort_keys=True, cls=DjangoJSONEncoder) # DjangoJSONEncoder makes sure dates are handled in the right format
+
+    def __repr__(self):
+        return self.__class__.__name__ + " Object: " + str(self)
+
+    # converts this object to a dictionary, correcting the _vote
+    def to_json_dict(self):
+        data_dict = dict(self.__dict__) # make a copy, so as to not edit the original dict
+        data_dict["vote"] = data_dict["_vote"]
+        del data_dict["_vote"]
+        return data_dict
+
