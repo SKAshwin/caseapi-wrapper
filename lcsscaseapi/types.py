@@ -232,8 +232,8 @@ class JudgeRuling:
     # author is bool, indicating whether this judge was the author of the majority opinion on the case
     # vote is a string, representing how the judge voted (concurring, dissenting)
     def __init__(self, case_id, judge_id, id=None, author=None, vote=None):
-        self.case_id = case_id
-        self.judge_id = judge_id
+        self.case = case_id
+        self.judge = judge_id
         self.id = id
         self.author = author
         self.vote = vote
@@ -274,4 +274,19 @@ class JudgeRuling:
         data_dict["vote"] = data_dict["_vote"]
         del data_dict["_vote"]
         return data_dict
+
+    @classmethod
+    def from_json_dict(self, fields):
+        case_id = fields.get("case", None)
+        judge_id = fields.get("judge", None)
+
+        if case_id == None or judge_id == None:
+            raise Exception("Cannot have JudgeRuling without 'case' field or without 'judge' field")
+        
+        jr = JudgeRuling(case = case_id, judge = judge_id)
+        jr.id = fields.get("id", None)
+        jr.author = fields.get("author", None)
+        jr.vote = fields.get("vote", None)
+
+        return jr
 
