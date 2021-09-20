@@ -280,7 +280,7 @@ class JudgeRuling:
         if case_id == None or judge_id == None:
             raise Exception("Cannot have JudgeRuling without 'case' field or without 'judge' field")
         
-        jr = JudgeRuling(case = case_id, judge = judge_id)
+        jr = JudgeRuling(case_id = case_id, judge_id = judge_id)
         jr.id = fields.get("id", None)
         jr.author = fields.get("author", None)
         jr.vote = fields.get("vote", None)
