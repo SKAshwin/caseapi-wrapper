@@ -253,9 +253,6 @@ class JudgeRuling:
             return False
         if not isinstance(other, JudgeRuling):
             return NotImplemented
-        
-        self.tags.sort()
-        other.tags.sort()
         return str(self) == str(other)
     
     def __neq__(self, other):
