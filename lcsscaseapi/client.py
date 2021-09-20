@@ -1,5 +1,5 @@
 from lcsscaseapi import constants
-from lcsscaseapi.types import CaseMeta, USCircuitCaseMeta, USJudge
+from lcsscaseapi.types import CaseMeta, JudgeRuling, USCircuitCaseMeta, USJudge
 import requests
 import json
 
@@ -38,6 +38,8 @@ class LCSSClient:
     def upload_us_judges(self, judges):
         return self._upload_generic_object(judges, constants.US_JUDGE_ENDPOINT, USJudge)
 
+    def upload_judge_ruling(self, judge_rulings):
+        return self._upload_generic_object(judge_rulings, constants.JUDGE_RULING_ENDPOINT, JudgeRuling)
 
     # For internal use only
     # a bunch of the upload-x objects are basically identical, so they each call this internal function
