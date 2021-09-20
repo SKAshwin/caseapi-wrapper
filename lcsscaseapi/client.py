@@ -20,14 +20,7 @@ class LCSSClient:
             raise Exception("Unknown error, see response from server: " + str(response.content))
         
     def get_cases(self, **kwargs):
-        response = requests.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, params=kwargs, 
-                            headers={"Authorization":"Token " + self._token})
-        if response.status_code == 200:
-            cases_dict = response.json() # the json array of case objects will be converted to an array of dictionaries
-            cases = [CaseMeta.from_json_dict(case_json) for case_json in cases_dict]
-            return cases
-        else:
-            raise Exception("Unknown error, see response from server: " + str(response.content))
+        return self._get_generic_object(constants.CASE_ENDPOINT, CaseMeta, **kwargs)
     
     def get_us_judges(self, **kwargs):
         pass
@@ -42,7 +35,19 @@ class LCSSClient:
         return self._upload_generic_object(judge_rulings, constants.JUDGE_RULING_ENDPOINT, JudgeRuling)
 
     # For internal use only
-    # a bunch of the upload-x objects are basically identical, so they each call this internal function
+    # a bunch of the get-x functions are basically identical, so they each call this internal function
+    def _get_generic_object(self, endpoint, class_object, **kwargs):
+        response = requests.get('https://' + constants.DOMAIN_NAME + endpoint, params=kwargs, 
+                            headers={"Authorization":"Token " + self._token})
+        if response.status_code == 200:
+            cases_dict = response.json() # the json array of generic objects will be converted to an array of dictionaries
+            cases = [class_object.from_json_dict(case_json) for case_json in cases_dict]
+            return cases
+        else:
+            raise Exception("Unknown error, see response from server: " + str(response.content))
+
+    # For internal use only
+    # a bunch of the upload-x functions are basically identical, so they each call this internal function
     def _upload_generic_object(self, objects, endpoint, class_object):
         json_data = [object.to_json_dict() for object in objects]
         response = requests.post('https://' + constants.DOMAIN_NAME + endpoint, 
