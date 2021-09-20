@@ -19,7 +19,7 @@ class LCSSClient:
         else:
             raise Exception("Unknown error, see response from server: " + str(response.content))
         
-    def search_cases(self, **kwargs):
+    def get_cases(self, **kwargs):
         response = requests.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, params=kwargs, 
                             headers={"Authorization":"Token " + self._token})
         if response.status_code == 200:
@@ -28,6 +28,9 @@ class LCSSClient:
             return cases
         else:
             raise Exception("Unknown error, see response from server: " + str(response.content))
+    
+    def get_us_judges(self, **kwargs):
+        pass
 
     def upload_us_cases(self, cases):
         return self._upload_generic_object(cases, constants.CIRCUIT_CASE_ENDPOINT, USCircuitCaseMeta)

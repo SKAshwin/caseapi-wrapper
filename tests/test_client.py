@@ -45,7 +45,7 @@ def test_generic_error_login(requests_mock):
     with pytest.raises(Exception, match="Unknown error.*contents of error message"):
         client = LCSSClient(username="testing", password="123")
 
-def test_search_cases(requests_mock):
+def test_get_cases(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
     client = LCSSClient(username="testing", password="123")
     returnjson = [
@@ -72,12 +72,12 @@ def test_search_cases(requests_mock):
     ]
     returncasemeta = [CaseMeta.from_json_dict(x) for x in returnjson]
     requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, json = returnjson, status_code=200)
-    cases = client.search_cases(title="9th Cir.")
+    cases = client.get_cases(title="9th Cir.")
 
     assert cases == returncasemeta
     assert requests_mock.request_history[-1].qs == {"title":["9th cir."]} # notice: search terms are case insensitive
 
-def test_search_cases_multiple_args(requests_mock):
+def test_get_cases_multiple_args(requests_mock):
     # test that multiple search arguments load correctly
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
     client = LCSSClient(username="testing", password="123")
@@ -105,26 +105,26 @@ def test_search_cases_multiple_args(requests_mock):
     ]
     returncasemeta = [CaseMeta.from_json_dict(x) for x in returnjson]
     requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, json = returnjson, status_code=200)
-    cases = client.search_cases(title="9th Cir.", doc_id="X44")
+    cases = client.get_cases(title="9th Cir.", doc_id="X44")
 
     assert cases == returncasemeta
     assert requests_mock.request_history[-1].qs == {"title":["9th cir."], "doc_id":["x44"]} # notice: search terms are case insensitive
 
-def test_search_cases_no_result(requests_mock):
+def test_get_cases_no_result(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
     client = LCSSClient(username="testing", password="123")
     requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, json = [], status_code=200)
-    cases = client.search_cases(title="9th Cir.", some_made_up_field="123") # searching by a field that doesn't exist should not trigger an error
+    cases = client.get_cases(title="9th Cir.", some_made_up_field="123") # searching by a field that doesn't exist should not trigger an error
 
     assert len(cases) == 0
     assert requests_mock.request_history[-1].qs == {"title":["9th cir."], "some_made_up_field":["123"]} # notice: search terms are case insensitive
 
-def test_search_cases_error(requests_mock):
+def test_get_cases_error(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
     client = LCSSClient(username="testing", password="123")
     requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, status_code=500)
     with pytest.raises(Exception, match="Unknown error.*"):
-        client.search_cases(title="9th Cir.", some_made_up_field="123")
+        client.get_cases(title="9th Cir.", some_made_up_field="123")
 
 def test_upload_us_cases(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
