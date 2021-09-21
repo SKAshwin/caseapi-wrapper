@@ -21,9 +21,15 @@ class LCSSClient:
         
     def get_cases(self, **kwargs):
         return self._get_generic_object(constants.CASE_ENDPOINT, CaseMeta, **kwargs)
+
+    def get_us_circuit_cases(self, **kwargs):
+        return self._get_generic_object(constants.CASE_ENDPOINT, USCircuitCaseMeta, **kwargs)
     
     def get_us_judges(self, **kwargs):
         return self._get_generic_object(constants.US_JUDGE_ENDPOINT, USJudge, **kwargs)
+    
+    def get_judge_ruling(self, **kwargs):
+        return self._get_generic_object(constants.US_JUDGE_ENDPOINT, JudgeRuling, **kwargs)
 
     def upload_us_cases(self, cases):
         return self._upload_generic_object(cases, constants.CIRCUIT_CASE_ENDPOINT, USCircuitCaseMeta)
