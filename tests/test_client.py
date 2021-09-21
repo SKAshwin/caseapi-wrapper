@@ -126,6 +126,30 @@ def test_get_cases_error(requests_mock):
     with pytest.raises(Exception, match="Unknown error.*"):
         client.get_cases(title="9th Cir.", some_made_up_field="123")
 
+def test_get_us_judges(requests_mock):
+    pass
+
+def test_get_us_judges_multiple_args(requests_mock):
+    pass
+
+def test_get_us_judges_no_result(requests_mock):
+    pass
+
+def test_get_us_judges_error(requests_mock):
+    pass
+
+def test_get_jr(requests_mock):
+    pass
+
+def test_get_jr_multiple_args(requests_mock):
+    pass
+
+def test_get_jr_no_result(requests_mock):
+    pass
+
+def test_get_jr_error(requests_mock):
+    pass
+
 def test_upload_us_cases(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
     client = LCSSClient(username="testing", password="123")
@@ -248,3 +272,23 @@ def test_upload_us_judges_unknown_error(requests_mock):
         client.upload_us_judges(new_judges)
     assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
     assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
+
+def test_upload_jr(requests_mock):
+    pass
+
+def test_upload_jr_non_admin(requests_mock):
+    pass
+
+def test_upload_jr_bad_jr(requests_mock):
+    # for example, if a JR with the exact same judge and case already exists - a judge can only rule on a given case once
+    response_json = [
+        {
+            "non_field_errors": [
+                "The fields judge, case must make a unique set."
+            ]
+        }
+    ]
+    pass
+
+def test_upload_jr_unknown_error(requests_mock):
+    pass
