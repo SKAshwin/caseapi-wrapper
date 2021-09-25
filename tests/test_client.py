@@ -1,6 +1,6 @@
 from .context import lcsscaseapi
 from lcsscaseapi.client import LCSSClient
-from lcsscaseapi.types import CaseMeta, USCircuitCaseMeta, USJudge
+from lcsscaseapi.types import CaseMeta, JudgeRuling, USCircuitCaseMeta, USJudge
 from lcsscaseapi import constants
 import pytest
 import datetime
@@ -127,16 +127,84 @@ def test_get_cases_error(requests_mock):
         client.get_cases(title="9th Cir.", some_made_up_field="123")
 
 def test_get_us_judges(requests_mock):
-    pass
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    returnjson = [{
+        "judge_name": "Bob Woodward",
+        "judge_gender": USJudge.MALE,
+        "senior": True,
+        "party": USJudge.DEMOCRAT,
+        "id": 5
+    },
+    {
+        "judge_name": "Bob Smith",
+        "judge_gender": USJudge.MALE,
+        "senior": False,
+        "party": USJudge.REPUBLICAN,
+        "id": 10
+    }]
+    returnuj = [USJudge(name="Bob Woodward", gender = USJudge.MALE, senior = True, party = USJudge.DEMOCRAT, id=5),
+                USJudge(name="Bob Smith", gender = USJudge.MALE, senior = False, party = USJudge.REPUBLICAN, id=10)]
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.US_JUDGE_ENDPOINT, json = returnjson, status_code = 200)
+    uj = client.get_us_judges()
+
+    assert uj == returnuj
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
 
 def test_get_us_judges_multiple_args(requests_mock):
-    pass
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    returnjson = [{
+        "judge_name": "Bob Woodward",
+        "judge_gender": USJudge.MALE,
+        "senior": True,
+        "party": USJudge.DEMOCRAT,
+        "id": 5
+    },
+    {
+        "judge_name": "Bob Smith",
+        "judge_gender": USJudge.MALE,
+        "senior": False,
+        "party": USJudge.REPUBLICAN,
+        "id": 10
+    }]
+    returnuj = [USJudge(name="Bob Woodward", gender = USJudge.MALE, senior = True, party = USJudge.DEMOCRAT, id=5),
+                USJudge(name="Bob Smith", gender = USJudge.MALE, senior = False, party = USJudge.REPUBLICAN, id=10)]
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.US_JUDGE_ENDPOINT, json = returnjson, status_code = 200)
+    uj = client.get_us_judges(judge_name="Bob", judge_gender = USJudge.MALE)
+
+    assert uj == returnuj
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].qs == {"judge_name":["bob"], "judge_gender":[USJudge.MALE.lower()]}
+    # the URL parsing library used by the request mocker sets everything to lower case
+    # the actual request made is case sensitive, as it *should* be
+    # running print(requests_mock.request_history[-1].url) returns
+    # https://lcsscaseapi.duckdns.org/api/us/judges/?judge_name=Bob&judge_gender=Male
 
 def test_get_us_judges_no_result(requests_mock):
-    pass
+    # check that returning no result (ie, empty array, behaves correctly)
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    returnjson = []
+    returnuj = []
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.US_JUDGE_ENDPOINT, json = returnjson, status_code = 200)
+    uj = client.get_us_judges(judge_name="Bob", party = USJudge.DEMOCRAT)
+
+    assert uj == returnuj
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].qs == {"judge_name":["bob"], "party":[USJudge.DEMOCRAT.lower()]}
 
 def test_get_us_judges_error(requests_mock):
-    pass
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    response_json = {"whatever":"contents of error message"}
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.US_JUDGE_ENDPOINT, json = response_json, status_code = 500)
+    
+    with pytest.raises(Exception, match="Unknown error, see response from server:.*contents of error message.*"):
+        client.get_us_judges(judge_name="Bob", party = USJudge.DEMOCRAT)
+
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].qs == {"judge_name":["bob"], "party":[USJudge.DEMOCRAT.lower()]}
 
 def test_get_jr(requests_mock):
     pass
