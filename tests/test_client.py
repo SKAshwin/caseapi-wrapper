@@ -1,6 +1,6 @@
 from .context import lcsscaseapi
 from lcsscaseapi.client import LCSSClient
-from lcsscaseapi.types import CaseMeta, JudgeRuling, USCircuitCaseMeta, USJudge
+from lcsscaseapi.types import CaseMeta, Judge, JudgeRuling, USCircuitCaseMeta, USJudge
 from lcsscaseapi import constants
 import pytest
 import datetime
@@ -207,16 +207,86 @@ def test_get_us_judges_error(requests_mock):
     assert requests_mock.request_history[-1].qs == {"judge_name":["bob"], "party":[USJudge.DEMOCRAT.lower()]}
 
 def test_get_jr(requests_mock):
-    pass
+    # check that returning no result (ie, empty array, behaves correctly)
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    returnjson = [{
+        "judge":8,
+        "case":"X12345",
+        "id":1,
+        "vote": JudgeRuling.CONCURRING,
+        "author": True,
+     },{
+        "judge":12,
+        "case":"X12345",
+        "id":2,
+        "vote": JudgeRuling.DISSENTING,
+        "author": False,
+     }]
+    returnjr = [JudgeRuling(case_id="X12345", judge_id=8, id=1, vote = JudgeRuling.CONCURRING, author=True),
+                JudgeRuling(case_id="X12345", judge_id=12, id=2, vote = JudgeRuling.DISSENTING, author=False)]
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.JUDGE_RULING_ENDPOINT, json = returnjson, status_code = 200)
+    uj = client.get_judge_ruling()
+
+    assert uj == returnjr
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].qs == {}
 
 def test_get_jr_multiple_args(requests_mock):
-    pass
+    # check that returning no result (ie, empty array, behaves correctly)
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    returnjson = [{
+        "judge":6,
+        "case":"X23456",
+        "id":3,
+        "vote": JudgeRuling.DISSENTING,
+        "author": False,
+     },{
+        "judge":34,
+        "case":"X23456",
+        "id":4,
+        "vote": JudgeRuling.DISSENTING,
+        "author": False,
+     }]
+    returnjr = [JudgeRuling(case_id="X23456", judge_id=6, id=3, vote = JudgeRuling.DISSENTING, author=False),
+                JudgeRuling(case_id="X23456", judge_id=34, id=4, vote = JudgeRuling.DISSENTING, author=False)]
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.JUDGE_RULING_ENDPOINT, json = returnjson, status_code = 200)
+    uj = client.get_judge_ruling(vote = JudgeRuling.DISSENTING, case="X23456")
+
+    assert uj == returnjr
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].qs == {"vote":[JudgeRuling.DISSENTING.lower()], "case":["x23456"]}
+
+    # the URL parsing library used by the request mocker sets everything to lower case
+    # the actual request made is case sensitive, as it *should* be
+    # running print(requests_mock.request_history[-1].url) returns
+    # https://lcsscaseapi.duckdns.org/api/judgeruling/?vote=Dissenting&case=X23456
 
 def test_get_jr_no_result(requests_mock):
-    pass
+    # check that returning no result (ie, empty array, behaves correctly)
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    returnjson = []
+    returnjr = []
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.JUDGE_RULING_ENDPOINT, json = returnjson, status_code = 200)
+    uj = client.get_judge_ruling(judge=10, case="X3425")
+
+    assert uj == returnjr
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].qs == {"judge":['10'], "case":["x3425"]}
 
 def test_get_jr_error(requests_mock):
-    pass
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    client = LCSSClient(username="testing", password="123")
+    response_json = {"whatever":"contents of error message"}
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.JUDGE_RULING_ENDPOINT, json = response_json, status_code = 500)
+    
+    with pytest.raises(Exception, match = "Unknown error, see response from server:.*contents of error message.*"):
+        client.get_judge_ruling(judge=10, case="X3425")
+
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
+    assert requests_mock.request_history[-1].qs == {"judge":['10'], "case":["x3425"]}
 
 def test_upload_us_cases(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
@@ -342,13 +412,67 @@ def test_upload_us_judges_unknown_error(requests_mock):
     assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
 
 def test_upload_jr(requests_mock):
-    pass
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "admintoken"})
+    client = LCSSClient(username="testing", password="123")
+
+    new_jr = [JudgeRuling(case_id="x12345", judge_id=10, author=False, vote = JudgeRuling.CONCURRING),
+              JudgeRuling(case_id="x45678", judge_id=20, author=False, vote = JudgeRuling.DISSENTING)]
+    
+    new_jr_json = [{
+        "case":"x12345",
+        "judge":10,
+        "id": 1,
+        "author":False,
+        "vote":JudgeRuling.CONCURRING
+    },
+    {
+        "case":"x45678",
+        "judge":20,
+        "id": 2,
+        "author":False,
+        "vote":JudgeRuling.DISSENTING
+    }]
+
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.JUDGE_RULING_ENDPOINT, json = new_jr_json, status_code = 201)
+    return_jr = client.upload_judge_ruling(new_jr)
+
+    # check the array of rulings was correctly converted to JSON and put in the request body
+    assert [JudgeRuling.from_json_dict(jr_json) for jr_json in requests_mock.request_history[-1].json()] == new_jr
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token admintoken"
+    assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
+
+    # note that the returned judge rulings, unlike the created ones, have an ID field, so check for this
+    new_jr[0].id = 1 
+    new_jr[1].id = 2
+    assert return_jr == new_jr # check the returned JudgeRulings are what you expect
 
 def test_upload_jr_non_admin(requests_mock):
-    pass
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "nonadmintoken"})
+    client = LCSSClient(username="testing", password="123")
+
+    new_jr = [JudgeRuling(case_id="x12345", judge_id=10, author=False, vote = JudgeRuling.CONCURRING),
+              JudgeRuling(case_id="x45678", judge_id=20, author=False, vote = JudgeRuling.DISSENTING)]
+    
+    response_json = {
+        "detail": "You do not have permission to perform this action."
+    }
+
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.JUDGE_RULING_ENDPOINT, json = response_json, status_code = 403)
+    with pytest.raises(Exception, match = "Need admin credentials to upload new JudgeRuling:.*You do not have permission to perform this action.*"):
+        client.upload_judge_ruling(new_jr)
+
+    # check the array of rulings was correctly converted to JSON and put in the request body
+    assert [JudgeRuling.from_json_dict(jr_json) for jr_json in requests_mock.request_history[-1].json()] == new_jr
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token nonadmintoken"
+    assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
 
 def test_upload_jr_bad_jr(requests_mock):
     # for example, if a JR with the exact same judge and case already exists - a judge can only rule on a given case once
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "admintoken"})
+    client = LCSSClient(username="testing", password="123")
+
+    new_jr = [JudgeRuling(case_id="x12345", judge_id=10, author=False, vote = JudgeRuling.CONCURRING),
+              JudgeRuling(case_id="x45678", judge_id=20, author=False, vote = JudgeRuling.DISSENTING)]
     response_json = [
         {
             "non_field_errors": [
@@ -356,7 +480,29 @@ def test_upload_jr_bad_jr(requests_mock):
             ]
         }
     ]
-    pass
+    
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.JUDGE_RULING_ENDPOINT, json = response_json, status_code = 400)
+    with pytest.raises(Exception, match = "Invalid JudgeRuling object, see:.*The fields judge, case must make a unique set.*"):
+        client.upload_judge_ruling(new_jr)
+
+    # check the array of rulings was correctly converted to JSON and put in the request body
+    assert [JudgeRuling.from_json_dict(jr_json) for jr_json in requests_mock.request_history[-1].json()] == new_jr
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token admintoken"
+    assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
 
 def test_upload_jr_unknown_error(requests_mock):
-    pass
+    response_json = {"whatever":"contents of error message"}
+
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "admintoken"})
+    client = LCSSClient(username="testing", password="123")
+
+    new_jr = [JudgeRuling(case_id="x12345", judge_id=10, author=False, vote = JudgeRuling.CONCURRING),
+              JudgeRuling(case_id="x45678", judge_id=20, author=False, vote = JudgeRuling.DISSENTING)]
+    requests_mock.post("https://" + constants.DOMAIN_NAME + constants.JUDGE_RULING_ENDPOINT, json = response_json, status_code = 500)
+    with pytest.raises(Exception, match = "Unknown error, see response from server: .*contents of error message.*"):
+        client.upload_judge_ruling(new_jr)
+
+    # check the array of rulings was correctly converted to JSON and put in the request body
+    assert [JudgeRuling.from_json_dict(jr_json) for jr_json in requests_mock.request_history[-1].json()] == new_jr
+    assert requests_mock.request_history[-1].headers["Authorization"] == "Token admintoken"
+    assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
