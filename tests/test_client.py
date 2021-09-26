@@ -200,7 +200,7 @@ def test_get_us_judges_error(requests_mock):
     response_json = {"whatever":"contents of error message"}
     requests_mock.get('https://' + constants.DOMAIN_NAME + constants.US_JUDGE_ENDPOINT, json = response_json, status_code = 500)
     
-    with pytest.raises(Exception, match="Unknown error, see response from server:.*contents of error message.*"):
+    with pytest.raises(Exception, match="Unknown error with status code 500, see response from server:.*contents of error message.*"):
         client.get_us_judges(judge_name="Bob", party = USJudge.DEMOCRAT)
 
     assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
@@ -282,7 +282,7 @@ def test_get_jr_error(requests_mock):
     response_json = {"whatever":"contents of error message"}
     requests_mock.get('https://' + constants.DOMAIN_NAME + constants.JUDGE_RULING_ENDPOINT, json = response_json, status_code = 500)
     
-    with pytest.raises(Exception, match = "Unknown error, see response from server:.*contents of error message.*"):
+    with pytest.raises(Exception, match = "Unknown error with status code 500, see response from server:.*contents of error message.*"):
         client.get_judge_ruling(judge=10, case="X3425")
 
     assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
@@ -335,7 +335,7 @@ def test_upload_us_cases_unknown_error(requests_mock):
     client = LCSSClient(username="testing", password="123")
     new_cases = [USCircuitCaseMeta(case_id="X1111"), USCircuitCaseMeta(case_id="X2222", tags = ["HELLO", "WORLD"])]
     requests_mock.post("https://" + constants.DOMAIN_NAME + constants.CIRCUIT_CASE_ENDPOINT, status_code = 500)
-    with pytest.raises(Exception, match="Unknown error, see response from server:*"):
+    with pytest.raises(Exception, match="Unknown error with status code 500, see response from server:*"):
         client.upload_us_cases(new_cases)
     assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
 
@@ -406,7 +406,7 @@ def test_upload_us_judges_unknown_error(requests_mock):
     client = LCSSClient(username="testing", password="123")
     new_judges = [USJudge(name="Hello", party=USJudge.DEMOCRAT),USJudge(name="julio", gender= USJudge.FEMALE)]
     requests_mock.post("https://" + constants.DOMAIN_NAME + constants.US_JUDGE_ENDPOINT, json = response_json, status_code = 500)
-    with pytest.raises(Exception, match = "Unknown error, see response from server.*contents of error message.*"):
+    with pytest.raises(Exception, match = "Unknown error with status code 500, see response from server.*contents of error message.*"):
         client.upload_us_judges(new_judges)
     assert requests_mock.request_history[-1].headers["Authorization"] == "Token validtoken"
     assert requests_mock.request_history[-1].headers["Content-Type"] == "application/json"
@@ -499,7 +499,7 @@ def test_upload_jr_unknown_error(requests_mock):
     new_jr = [JudgeRuling(case_id="x12345", judge_id=10, author=False, vote = JudgeRuling.CONCURRING),
               JudgeRuling(case_id="x45678", judge_id=20, author=False, vote = JudgeRuling.DISSENTING)]
     requests_mock.post("https://" + constants.DOMAIN_NAME + constants.JUDGE_RULING_ENDPOINT, json = response_json, status_code = 500)
-    with pytest.raises(Exception, match = "Unknown error, see response from server: .*contents of error message.*"):
+    with pytest.raises(Exception, match = "Unknown error with status code 500, see response from server: .*contents of error message.*"):
         client.upload_judge_ruling(new_jr)
 
     # check the array of rulings was correctly converted to JSON and put in the request body

@@ -17,7 +17,7 @@ class LCSSClient:
             else:
                 raise Exception("Unknown bad request, see response from server: " + str(response.content))
         else:
-            raise Exception("Unknown error, see response from server: " + str(response.content))
+            raise Exception("Unknown error with status code " + str(response.status_code) + ", see response from server: " + str(response.content))
         
     def get_cases(self, **kwargs):
         return self._get_generic_object(constants.CASE_ENDPOINT, CaseMeta, **kwargs)
@@ -50,7 +50,7 @@ class LCSSClient:
             cases = [class_object.from_json_dict(case_json) for case_json in cases_dict]
             return cases
         else:
-            raise Exception("Unknown error, see response from server: " + str(response.content))
+            raise Exception("Unknown error with status code " + str(response.status_code) + ", see response from server: " + str(response.content))
 
     # For internal use only
     # a bunch of the upload-x functions are basically identical, so they each call this internal function
@@ -68,5 +68,5 @@ class LCSSClient:
         elif response.status_code == 400:
             raise Exception("Invalid " + class_object.__name__  + " object, see: " + str(response.content))
         else:
-            raise Exception("Unknown error, see response from server: " + str(response.content))
+            raise Exception("Unknown error with status code " + str(response.status_code) + ", see response from server: " + str(response.content))
         
