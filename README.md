@@ -5,3 +5,9 @@ Any use of the wrapper begins by initializing an LCSSClient object (defined in `
 *Warning: Do not write the username and password supplied to the LCSSClient object in code that is committed to a repository. Fetch these details instead from environmental variblaes. Otherwise anyone reading your repository can access the API*
 
 Testing uses pytest and requests-mocker and tests are located in the `tests/` directory.
+
+### Publishing to Pypi
+
+To publish new versions, change the version number in setup.cfg, generate a new distribution and upload it to twine. See here: https://packaging.python.org/tutorials/packaging-projects/ 
+
+To be precise, run `python3 -m build`. Then run `twine upload dist/*`.
