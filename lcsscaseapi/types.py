@@ -38,6 +38,13 @@ class CaseMeta:
     
     def __repr__(self):
         return self.__class__.__name__ + " Object: " + str(self)
+    
+    def __hash__(self):
+        self.tags.sort()
+        hash_dict = dict(self.__dict__)
+        hash_dict["tags"] = tuple(hash_dict["tags"]) # lists cant be hashed, tuples can
+        attrs = tuple([hash_dict[key] for key in sorted(hash_dict.keys())])
+        return hash(attrs)
 
     @classmethod
     def from_json_dict(self, fields):
@@ -169,6 +176,10 @@ class Judge:
         data_dict["judge_gender"] = data_dict["_judge_gender"]
         del data_dict["_judge_gender"]
         return data_dict
+    
+    def __hash__(self):
+        attrs = tuple([self.__dict__[key] for key in sorted(self.__dict__.keys())])
+        return hash(attrs)
 
     @classmethod
     def from_json_dict(self, fields):
@@ -264,6 +275,10 @@ class JudgeRuling:
 
     def __repr__(self):
         return self.__class__.__name__ + " Object: " + str(self)
+
+    def __hash__(self):
+        attrs = tuple([self.__dict__[key] for key in sorted(self.__dict__.keys())])
+        return hash(attrs)
 
     # converts this object to a dictionary, correcting the _vote
     def to_json_dict(self):

@@ -108,6 +108,31 @@ def test_neq():
 
     assert obj1 != obj2
 
+def test_hash():
+    # checking that hashing is not sensitive to the ordering of the tags in the array
+
+    obj1 = CaseMeta(
+        case_id = "X44DV3",
+        tags = ["HELLO", "WORLD"],
+        date = datetime.date(1965, 12, 10)
+    )
+
+    obj2 = CaseMeta(
+        case_id = "X44DV3",
+        tags = ["WORLD", "HELLO"],
+        date = datetime.date(1965, 12, 11)
+    )
+
+    assert obj1.__hash__() != obj2.__hash__()
+
+    s = set()
+    s.add(obj1)
+    assert obj2 not in s
+
+    obj2.date = datetime.date(1965, 12, 10)
+    assert obj1.__hash__() == obj2.__hash__()
+    assert obj2 in s
+
 def test_from_json_dict():
     # intentionally out of the usual order
     case_info = {

@@ -44,6 +44,18 @@ def test_judge_eq():
     judge2.judge_gender = Judge.MALE
     assert judge2 == judge1
 
+def test_judge_hash():
+    judge1 = Judge(name="Hello World", orig_name="Hello", gender=Judge.MALE)
+    judge2 =Judge(name="Hello World", orig_name="Hello", gender=Judge.FEMALE)
+    assert judge2.__hash__() != judge1.__hash__()
+    
+    s = set()
+    s.add(judge1)
+    assert judge2 not in s
+
+    judge2.judge_gender = Judge.MALE
+    assert judge2.__hash__() == judge1.__hash__()
+    assert judge2 in s
 
 def test_judge_str():
     judge = Judge(name="Hello World", gender=Judge.MALE)

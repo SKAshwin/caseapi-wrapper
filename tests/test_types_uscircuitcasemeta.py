@@ -92,6 +92,36 @@ def test_neq():
 
     assert obj1 != obj2
 
+def test_hash():
+    obj1 = USCircuitCaseMeta(
+        case_id = "X44DV3",
+        case_name = "Barker v. United States",
+        title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        doc_title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        tags = ["WORLD", "HELLO"],
+        circuit_name = USCircuitCaseMeta.SIXTH_CIRCUIT
+    )
+
+    obj2 = USCircuitCaseMeta(
+        title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        doc_title = "Barker v. United States, 198 F.2d 932 (9th Cir. 1952), Court Opinion",
+        case_id = "blah",
+        case_name = "Barker v. United States",
+        circuit_name = USCircuitCaseMeta.SIXTH_CIRCUIT,
+        tags = ["HELLO", "WORLD"]
+    )
+
+    assert obj1.__hash__() != obj2.__hash__()
+
+    s=set()
+    s.add(obj1)
+    assert obj2 not in s
+
+    obj2.case_id = "X44DV3"
+
+    assert obj1.__hash__() == obj2.__hash__()
+    assert obj2 in s
+
 def test_invalid_circuit_constructor():
     # check that supplying an invalid circuit name triggers an exception with the right message
     with pytest.raises(Exception) as e:

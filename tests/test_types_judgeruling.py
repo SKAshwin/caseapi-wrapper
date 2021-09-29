@@ -52,6 +52,20 @@ def test_jr_eq():
     jr1.author = True
     assert jr1 == jr2
 
+def test_jr_hash():
+    jr1 = JudgeRuling(case_id="W1212", judge_id=22, vote = JudgeRuling.CONCURRING)
+    jr2 = JudgeRuling(case_id="W1212", judge_id=22, vote = JudgeRuling.CONCURRING, author = True)
+
+    assert jr1.__hash__() != jr2.__hash__()
+
+    s = set()
+    s.add(jr2)
+    assert jr1 not in s
+
+    jr1.author = True
+    assert jr1.__hash__() == jr2.__hash__()
+    assert jr1 in s
+
 def test_jr_str():
     jr = JudgeRuling(case_id="V1234", judge_id=8, vote = JudgeRuling.CONCURRING, author = False)
     assert str(jr) == r'{"author": false, "case": "V1234", "id": null, "judge": 8, "vote": "Concurring"}'

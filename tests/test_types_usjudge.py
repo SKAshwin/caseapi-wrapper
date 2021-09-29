@@ -34,6 +34,22 @@ def test_usjudge_eq_neq():
     uj2.party = USJudge.DEMOCRAT
     assert uj1 == uj2
 
+def test_usjudge_hash():
+    uj1 = USJudge(name = "Bob", party = USJudge.DEMOCRAT)
+    uj2 = USJudge(name = "Bob", party = USJudge.REPUBLICAN)
+    assert uj1.__hash__() != uj2.__hash__()
+
+    s = set()
+    s.add(uj1)
+    assert uj2 not in s
+
+    uj2.party = USJudge.DEMOCRAT
+    assert uj1.__hash__() == uj2.__hash__()
+
+    s = set()
+    s.add(uj1)
+    assert uj2 in s
+
 def test_usjudge_from_json():
     uj_dict = {
         "id": 5,
