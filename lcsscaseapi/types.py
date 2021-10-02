@@ -232,10 +232,11 @@ class USJudge(Judge):
 
 class JudgeRuling:
 
+    PARTIAL = "Partial"
     CONCURRING = "Concurring"
     DISSENTING = "Dissenting"
 
-    VOTES = [DISSENTING, CONCURRING]
+    VOTES = [DISSENTING, CONCURRING, PARTIAL]
 
     # case_id is a string, of the case a judge ruled on
     # judge_id is an integer, of the judge who ruled on the case

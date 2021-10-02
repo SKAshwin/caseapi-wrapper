@@ -45,8 +45,8 @@ def test_jr_vote_setter():
         jr.vote = "Agree"
 
 def test_jr_eq():
-    jr1 = JudgeRuling(case_id="W1212", judge_id=22, vote = JudgeRuling.CONCURRING)
-    jr2 = JudgeRuling(case_id="W1212", judge_id=22, vote = JudgeRuling.CONCURRING, author = True)
+    jr1 = JudgeRuling(case_id="W1212", judge_id=22, vote = JudgeRuling.PARTIAL)
+    jr2 = JudgeRuling(case_id="W1212", judge_id=22, vote = JudgeRuling.PARTIAL, author = True)
 
     assert jr1 != jr2
     jr1.author = True
