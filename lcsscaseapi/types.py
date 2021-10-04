@@ -1,11 +1,26 @@
+# ====================================================================================== #
+# Data types to interface with DJango.
+# 
+# Author : Ashwin Kumar
+# ====================================================================================== #
 import json
 from datetime import datetime
 from django.core.serializers.json import DjangoJSONEncoder
 
 
 class CaseMeta:
-    def __init__(self, case_id = None, case_name = None, title = None, doc_title = None, doc_id = None, doc_type = None, docket_number = None, outcome = None,
-                    self_cite = None, tags = [], date = None):
+    def __init__(self,
+                 case_id = None,
+                 case_name = None,
+                 title = None,
+                 doc_title = None,
+                 doc_id = None,
+                 doc_type = None,
+                 docket_number = None,
+                 outcome = None,
+                 self_cite = None,
+                 tags = [],
+                 date = None):
         self.case_id = case_id
         self.case_name = case_name
         self.title = title
@@ -33,7 +48,8 @@ class CaseMeta:
             return not self.__eq__(other)
     
     def __str__(self):
-        # be careful with this - if some key's values should be hidden in a future change make sure to change this method
+        # be careful with this - if some key's values should be hidden in a future change
+        # make sure to change this method
         return json.dumps(self.__dict__, sort_keys=True, cls=DjangoJSONEncoder)
     
     def __repr__(self):
@@ -61,7 +77,8 @@ class CaseMeta:
         cm.tags = fields.get("tags", [])
         datestring = fields.get("date", None)
         if datestring != None:
-            cm.date = datetime.strptime(datestring, '%Y-%m-%d').date() # dates are strings in JSON parsed dictionaries, need to be parsed into date obj
+            cm.date = datetime.strptime(datestring, '%Y-%m-%d').date() # dates are
+                    # strings in JSON parsed dictionaries, need to be parsed into date obj
         else:
             cm.date = None
         return cm
@@ -81,11 +98,34 @@ class USCircuitCaseMeta(CaseMeta):
     TENTH_CIRCUIT = "10th Circuit"
     ELEVENTH_CIRCUIT = "11th Circuit"
     DC_CIRCUIT = "DC Circuit"
-    CIRCUITS = [FED_CIRCUIT, FIRST_CIRCUIT, SECOND_CIRCUIT, THIRD_CIRCUIT, FOURTH_CIRCUIT, FIFTH_CIRCUIT, SIXTH_CIRCUIT, SEVENTH_CIRCUIT, 
-                EIGHTH_CIRCUIT, NINTH_CIRCUIT, TENTH_CIRCUIT, ELEVENTH_CIRCUIT, DC_CIRCUIT]
-    def __init__(self, case_id = None, case_name = None, title = None, doc_title = None, doc_id = None, doc_type = None, docket_number = None, outcome = None,
-                    self_cite = None, tags = [], date = None, circuit_name = None):
-        super().__init__(case_id, case_name, title, doc_title, doc_id, doc_type, docket_number, outcome, self_cite, tags, date)
+    CIRCUITS = [FED_CIRCUIT, FIRST_CIRCUIT, SECOND_CIRCUIT, THIRD_CIRCUIT,
+                FOURTH_CIRCUIT, FIFTH_CIRCUIT, SIXTH_CIRCUIT, SEVENTH_CIRCUIT, 
+                EIGHTH_CIRCUIT, NINTH_CIRCUIT, TENTH_CIRCUIT, ELEVENTH_CIRCUIT,
+                DC_CIRCUIT]
+    def __init__(self,
+                 case_id = None,
+                 case_name = None,
+                 title = None,
+                 doc_title = None,
+                 doc_id = None,
+                 doc_type = None,
+                 docket_number = None,
+                 outcome = None,
+                 self_cite = None,
+                 tags = [],
+                 date = None,
+                 circuit_name = None):
+        super().__init__(case_id,
+                         case_name,
+                         title,
+                         doc_title,
+                         doc_id,
+                         doc_type,
+                         docket_number,
+                         outcome,
+                         self_cite,
+                         tags,
+                         date)
         self.circuit_name = circuit_name
 
     @property
@@ -95,8 +135,9 @@ class USCircuitCaseMeta(CaseMeta):
     @circuit_name.setter
     def circuit_name(self, val):
         if val not in USCircuitCaseMeta.CIRCUITS and val != None:
-            raise Exception("circuit_name is not a valid circuit name or None. Valid names must be one of the following (or a None): " 
-                                        + ", ".join(USCircuitCaseMeta.CIRCUITS))
+            raise Exception("circuit_name is not a valid circuit name or None. Valid "+
+                            "names must be one of the following (or a None): " +
+                            ", ".join(USCircuitCaseMeta.CIRCUITS))
         self._circuit_name = val
 
     # Returns the circuit of this case as a number
@@ -164,7 +205,8 @@ class Judge:
             return not self.__eq__(other)
     
     def __str__(self):
-        # be careful with this - if some key's values should be hidden in a future change make sure to change this method
+        # be careful with this - if some key's values should be hidden in a future change
+        # make sure to change this method
         return json.dumps(self.to_json_dict(), sort_keys=True, cls=DjangoJSONEncoder) # DjangoJSONEncoder makes sure dates are handled in the right format
     
     def __repr__(self):
@@ -238,12 +280,16 @@ class JudgeRuling:
 
     VOTES = [DISSENTING, CONCURRING, PARTIAL]
 
-    # case_id is a string, of the case a judge ruled on
-    # judge_id is an integer, of the judge who ruled on the case
-    # id is the ID of the ruling; set by the server, cannot be supplied in objects you want to create, or updated
-    # author is bool, indicating whether this judge was the author of the majority opinion on the case
-    # vote is a string, representing how the judge voted (concurring, dissenting)
     def __init__(self, case_id, judge_id, id=None, author=None, vote=None):
+        """
+        case_id is a string, of the case a judge ruled on
+        judge_id is an integer, of the judge who ruled on the case
+        id is the ID of the ruling; set by the server, cannot be supplied in objects you
+         want to create, or updated
+        author is bool, indicating whether this judge was the author of the majority opinion
+         on the case
+        vote is a string, representing how the judge voted (concurring, dissenting)
+        """
         self.case = case_id
         self.judge = judge_id
         self.id = id
@@ -271,7 +317,8 @@ class JudgeRuling:
         return not self.__eq__(other)
     
     def __str__(self):
-        # be careful with this - if some key's values should be hidden in a future change make sure to change this method
+        # be careful with this - if some key's values should be hidden in a future change
+        # make sure to change this method
         return json.dumps(self.to_json_dict(), sort_keys=True, cls=DjangoJSONEncoder) # DjangoJSONEncoder makes sure dates are handled in the right format
 
     def __repr__(self):
