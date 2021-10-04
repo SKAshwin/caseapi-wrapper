@@ -1,9 +1,13 @@
+# Testing module for client.
+# Author : Ashwin Kumar
 from .context import lcsscaseapi
 from lcsscaseapi.client import LCSSClient
 from lcsscaseapi.types import CaseMeta, Judge, JudgeRuling, USCircuitCaseMeta, USJudge
 from lcsscaseapi import constants
 import pytest
 import datetime
+
+
 
 def test_init_successful(requests_mock):
     requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "hi"})
@@ -16,7 +20,9 @@ def test_init_wrong_login(requests_mock):
             "Unable to log in with provided credentials."
         ]
     }
-    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = response_json, status_code = 400)
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT,
+                       json = response_json,
+                       status_code = 400)
     with pytest.raises(Exception, match="Incorrect log-in credentials"):
         client = LCSSClient(username="testing", password="123")
 
@@ -29,9 +35,12 @@ def test_missing_login(requests_mock):
             "This field may not be blank."
         ]
     }
-    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = response_json, status_code = 400)
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT,
+                       json = response_json,
+                       status_code = 400)
     with pytest.raises(Exception, match="Incorrect log-in credentials: empty username or password"):
-        client = LCSSClient(username="testing", password="123")
+        client = LCSSClient(username="testing",
+                            password="123")
 
 def test_generic_badrequest_login(requests_mock):
     response_json = {"whatever":"contents of error message"}
@@ -46,7 +55,8 @@ def test_generic_error_login(requests_mock):
         client = LCSSClient(username="testing", password="123")
 
 def test_get_cases(requests_mock):
-    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT,
+                       json = {"token": "validtoken"})
     client = LCSSClient(username="testing", password="123")
     returnjson = [
         {
@@ -71,15 +81,19 @@ def test_get_cases(requests_mock):
         }
     ]
     returncasemeta = [CaseMeta.from_json_dict(x) for x in returnjson]
-    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, json = returnjson, status_code=200)
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT,
+                      json = returnjson,
+                      status_code=200)
     cases = client.get_cases(title="9th Cir.")
 
     assert cases == returncasemeta
-    assert requests_mock.request_history[-1].qs == {"title":["9th cir."]} # notice: search terms are case insensitive
+    # notice: search terms are case insensitive
+    assert requests_mock.request_history[-1].qs == {"title":["9th cir."]} 
 
 def test_get_cases_multiple_args(requests_mock):
     # test that multiple search arguments load correctly
-    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT, json = {"token": "validtoken"})
+    requests_mock.post('https://' + constants.DOMAIN_NAME + constants.AUTH_ENDPOINT,
+                       json = {"token": "validtoken"})
     client = LCSSClient(username="testing", password="123")
     returnjson = [
         {
@@ -104,7 +118,8 @@ def test_get_cases_multiple_args(requests_mock):
         }
     ]
     returncasemeta = [CaseMeta.from_json_dict(x) for x in returnjson]
-    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT, json = returnjson, status_code=200)
+    requests_mock.get('https://' + constants.DOMAIN_NAME + constants.CASE_ENDPOINT,
+                      json = returnjson, status_code=200)
     cases = client.get_cases(title="9th Cir.", doc_id="X44")
 
     assert cases == returncasemeta
